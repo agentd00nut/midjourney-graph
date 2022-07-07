@@ -2,13 +2,13 @@ import requests, http
 
 MIDJOURNEY_COOKIE = None
 with open('conf\midj.cookie', 'r') as f:
-    raw_cookie_line = f.read()
+    MIDJOURNEY_COOKIE = f.read()
 
 def makeMidJourneyRequest(url, json=None):
     global MIDJOURNEY_COOKIE
     
     headers = {
-        'cookie': raw_cookie_line,
+        'cookie': MIDJOURNEY_COOKIE,
         'authority': "www.midjourney.com",
         'accept': "*/*",
         'accept-language': "en-US,en;q=0.9",
@@ -39,8 +39,6 @@ def makeMidJourneyRequest(url, json=None):
 def getRecentJobsForUser(userId, num_jobs, page=1):
     global MIDJOURNEY_COOKIE
     url = "https://www.midjourney.com/api/app/recent-jobs"
-
-
     if page == 0:
         page = 1
 
