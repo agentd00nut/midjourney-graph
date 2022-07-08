@@ -1,3 +1,4 @@
+from dataclasses import asdict
 from src.job import jobFromJson
 from src.mj import makeMidJourneyRequest
 from src.node import Node, nodeFromJob
@@ -117,3 +118,8 @@ class Graph:
                 break
 
             node = referance_node
+
+
+    def getVisDCCData(self):
+        return {'nodes': [asdict(self.nodes[n]) for n in self.nodes], 'edges': [
+        self.edges[e].asGraphEdge() for e in self.edges]}

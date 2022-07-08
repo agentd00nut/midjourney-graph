@@ -1,4 +1,5 @@
 
+from time import sleep
 from dash import Dash, html, dcc, callback_context
 from dash.dependencies import Input, Output
 import visdcc
@@ -6,17 +7,26 @@ import requests
 from dataclasses import asdict
 from src.discord import DiscordLink
 from src.job import  jobFromJson
-from src.mj import getRecentJobsForUser
-from src.node import nodeFromJob
+from src.mj import getRecentJobsForUser, getRunningJobsForUser
+from src.node import Node, nodeFromJob
 from src.graph import Graph
 app = Dash(__name__)
+NETWORK=visdcc.Network(
+    id='net',
+    selection={"nodes": [], "edges": []}
+    ,options=dict(height='400px',
+        width='100%',
+        layout={'clusterThreshold': 0,
+        'hierarchial': {'enabled': True, 'direction': 'UD', },
+        'edges': {'arrows': {'to': {'enabled': True, 'scaleFactor': 0.5}}},
+        'physics': {'enabled': False, 'barnesHut': {'enabled': True, 'gravitationalConstant': -20000, 'springLength': 100, 'springConstant': 0.1, 'damping': 0.5}}
+    }))
+
 
 app.layout = html.Div([
-    visdcc.Network(id='net',
-                   selection={"nodes": [], "edges": []},
-                   options=dict(height='400px', width='100%', layout={'clusterThreshold': 0, 'hierarchial': {'enabled': True, 'direction': 'UD'}})),
-    html.Div(id='node_info'),
-
+    NETWORK,
+     html.Div(id='node_info'),
+    
     html.Div(
         [
             dcc.Input(id='image_selection', min=1,
@@ -119,6 +129,7 @@ make_variations_lc = -1
     Output('jobStatus', 'children'),
     [
         Input('net', 'selection'),
+        Input('userId', 'value'),
         Input('image_selection', 'value'),
         Input('variance', 'n_clicks'),
         Input('upsample', 'n_clicks'),
@@ -126,7 +137,7 @@ make_variations_lc = -1
         Input('make_variations', 'n_clicks'),
         Input('jobStatus', 'children')
     ])
-def runJob(selections, value, variance, upsample, reroll, make_variations, jobStatus):
+def runJob(selections, userId, value, variance, upsample, reroll, make_variations, jobStatus):
     global graph
     global variance_lc, upsample_lc, reroll_lc, make_variations_lc
 
@@ -166,7 +177,13 @@ def runJob(selections, value, variance, upsample, reroll, make_variations, jobSt
     result = DL.runJob(node, int(value), jobType)
     if not result:
         return html.Div([html.H3(f"Failed to run {jobType} for {node.id}... reason: {result.text}... repeated failures mean you should probably stop")]) 
-    return html.Div([html.H3(f"Started {jobType} for {node.id}")])
+
+
+    # TODO: Reference image num will be wrong for upsample placeholder jobs
+    placeholder = Node(jobType+node.id, "im a placeholder", node.id, value, node.prompt, jobType, "", node.shape,  False, False, None )
+    graph.addNode(placeholder)
+    graph.addEdge(placeholder.referenceEdge())
+    return  html.Div([html.H3(f"Started {jobType} for {node.id}")])
 
 
 
@@ -180,10 +197,14 @@ def selectedEdges(x):
     return s
 
 
+
 @app.callback(
     Output('net', 'data'),
     [Input('userId', 'value'), Input('numJobs', 'value'), Input('page', 'value'), Input('jobsPerQuery', 'value'), Input('refresh_graph', 'n_clicks')])
 def mainFun(userId, numJobs, page, jobsPerQuery, refresh_graph):
+    
+    # https://visjs.github.io/vis-network/docs/network/#methodLayout
+    
 
     global graph
     # If we don't have a user id we just return an empty graph.
@@ -208,38 +229,38 @@ def mainFun(userId, numJobs, page, jobsPerQuery, refresh_graph):
         print(len(recent_jobs), page)
         page += 1
 
-    # Create a list of nodes from the recent jobs
-    nodes = [nodeFromJob(jobFromJson(j)) for j in recent_jobs]
-    print("Got", len(nodes), "nodes")
+    # Create a list of *new* nodes from the recent jobs
+    nodes = [n for n in [nodeFromJob(jobFromJson(j)) for j in recent_jobs] if not graph.hasNode(n)]
+    print("Got", len(nodes), "new nodes from",len(recent_jobs),"recent jobs")
 
     # Add the nodes to the graph
     print("Adding the first round of nodes, not iterating down references")
     for n in nodes:
         graph.addNode(n)
 
+    ### Herp; we can't remove these nodes without checking if the nodes that we know about are fully populated...
+
+
     # Remove nodes that are referenced by other nodes from the `nodes` list;
-    print("Removing nodes that are referenced by other nodes")
-    reference_job_ids = [n.reference_job_id for n in nodes if n.reference_job_id is not None or n.reference_job_id != '']
-    print(reference_job_ids)
-    print("Nodes in list before reference removals", len(nodes))
-    [nodes.remove(n) for n in nodes if n.id in reference_job_ids]
-    print("Nodes in list after reference removals", len(nodes))
+    # print("Removing new nodes that are referenced by other nodes")
+    # reference_job_ids = [n.reference_job_id for n in nodes if n.reference_job_id is not None or n.reference_job_id != '']
+    # print("Reference job ids: ", reference_job_ids)
+    # print("Nodes in list before reference removals", len(nodes))
+    # [nodes.remove(n) for n in nodes if n.id in reference_job_ids]
+    # print("Nodes in list after reference removals", len(nodes))
     # Iterate on the nodes, trying to add references for each node
     #       We do this to avoid having to download the data for each node / having to check our held nodes for every reference
-    print("")
-    print("")
-    print("")
-    print("Now checking their references")
+    print(f"Adding {len(nodes)} new nodes")
     for n in nodes:
         graph.addNodesReferences(n)
 
     print("done")
 
     # Return the graph as a json object compatible for the visdcc.Network
-    data = {'nodes': [asdict(graph.nodes[n]) for n in graph.nodes], 'edges': [
-        graph.edges[e].asGraphEdge() for e in graph.edges]}
+    # data = {'nodes': [asdict(graph.nodes[n]) for n in graph.nodes], 'edges': [
+    #     graph.edges[e].asGraphEdge() for e in graph.edges]}
 
-    return data
+    return graph.getVisDCCData()
 
 
 if __name__ == '__main__':
