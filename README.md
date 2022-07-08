@@ -86,6 +86,12 @@ Also grab the `authorization` string and put it into `conf/discord.authorization
 
 Lastly grab the `sessionId` string and put it into `conf/discord.sessionId`, make the file if it does not exist
 
+# Known issues
+- It's possible for a job from the midjourney api to come back with null's for the channel, thread, and message... usually this happens right before outages
+When it does it's problematic for obvious reasons.  A possible solution would be to use `/show` on the id in a known channel (DM to the bot?);  Another 
+would be to check if `/interaction` requests can be performed outside the channel that the bot knows an image is in before using `/show`.  Unfortunately none of these
+*update* the job information coming from the api
+
 # TODO
 
 Vaguely in order.
