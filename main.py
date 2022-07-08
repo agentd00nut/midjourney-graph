@@ -49,7 +49,7 @@ app.layout = html.Div([
                           min=1,
                           max=100,
                           debounce=True,
-                          value=1),
+                          value=10),
                 'jobsPerQuery:',
                 dcc.Input(id='jobsPerQuery',
                           placeholder='Jobs per query',
@@ -57,7 +57,7 @@ app.layout = html.Div([
                           debounce=True,
                           min=1,
                           max=100,
-                          value=5),
+                          value=10),
                 'Start Page:',
                 dcc.Input(id='page',
                           placeholder='Enter a page number to start on, 0 is first...',
@@ -165,8 +165,8 @@ def runJob(selections, value, variance, upsample, reroll, make_variations, jobSt
 
     result = DL.runJob(node, int(value), jobType)
     if not result:
-        result.raise_for_status()
-    return html.Div([html.H1(f"Started V{value} for {node.id}")])
+        return html.Div([html.H1(f"Failed to run {jobType} for {node.id}... reason: {result.text}... repeated failures mean you should probably stop")]) 
+    return html.Div([html.H1(f"Started {jobType} for {node.id}")])
 
 
 
