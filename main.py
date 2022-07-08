@@ -14,7 +14,7 @@ app = Dash(__name__)
 app.layout = html.Div([
     visdcc.Network(id='net',
                    selection={"nodes": [], "edges": []},
-                   options=dict(height='400px', width='100%', layout={'clusterThreshold': 3, 'hierarchial': {'enabled': True, 'direction': 'UD'}})),
+                   options=dict(height='400px', width='100%', layout={'clusterThreshold': 0, 'hierarchial': {'enabled': True, 'direction': 'UD'}})),
     html.Div(id='node_info'),
 
     html.Div(
@@ -98,7 +98,7 @@ def selection(selections):
     DL = DiscordLink()
     div = html.Div(
         [
-            html.Img(src=node.image, height='100%', style={'padding-top': '20px'}),
+            html.Img(src=node.image, height='100%', style={'padding-top': '40px'}),
             html.A(html.H4("Goto discord"), href=discord_link,),
 
         ],
@@ -165,8 +165,8 @@ def runJob(selections, value, variance, upsample, reroll, make_variations, jobSt
 
     result = DL.runJob(node, int(value), jobType)
     if not result:
-        return html.Div([html.H1(f"Failed to run {jobType} for {node.id}... reason: {result.text}... repeated failures mean you should probably stop")]) 
-    return html.Div([html.H1(f"Started {jobType} for {node.id}")])
+        return html.Div([html.H3(f"Failed to run {jobType} for {node.id}... reason: {result.text}... repeated failures mean you should probably stop")]) 
+    return html.Div([html.H3(f"Started {jobType} for {node.id}")])
 
 
 
@@ -187,12 +187,15 @@ def mainFun(userId, numJobs, page, jobsPerQuery, refresh_graph):
 
     global graph
     # If we don't have a user id we just return an empty graph.
-    if userId is None:
-        return {'nodes': [], 'edges': []}
+    # Actually a bug is if its an empty string it pulls a recent feed which is fun; though it doesn't work very well (trying to make variations etc. seems to fail almost 100% of the time)
+    #   
+    # if userId is None:
+    #     return {'nodes': [], 'edges': []}
 
     page = int(page)
     numJobs = int(numJobs)
-    # Get the recent jobs for the user
+    
+    # Get the recent jobs for the user; keep paginating until we've exceeded the max jobs.
     recent_jobs = []
     while len(recent_jobs) < int(numJobs):
         result = getRecentJobsForUser(userId, jobsPerQuery, page)
@@ -214,6 +217,13 @@ def mainFun(userId, numJobs, page, jobsPerQuery, refresh_graph):
     for n in nodes:
         graph.addNode(n)
 
+    # Remove nodes that are referenced by other nodes from the `nodes` list;
+    print("Removing nodes that are referenced by other nodes")
+    reference_job_ids = [n.reference_job_id for n in nodes if n.reference_job_id is not None or n.reference_job_id != '']
+    print(reference_job_ids)
+    print("Nodes in list before reference removals", len(nodes))
+    [nodes.remove(n) for n in nodes if n.id in reference_job_ids]
+    print("Nodes in list after reference removals", len(nodes))
     # Iterate on the nodes, trying to add references for each node
     #       We do this to avoid having to download the data for each node / having to check our held nodes for every reference
     print("")

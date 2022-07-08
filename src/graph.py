@@ -39,7 +39,7 @@ class Graph:
     def addNode(self, node: Node):
         print("addNode", node.id, node.reference_job_id)
 
-        # Check if the node already exists and has an image.
+        # Check if the node already exists and has an image and has a non 0 accumulated_duration ()
         if self.hasNode(node) and self.nodes[node.id].image is not None:
             print(" node already exists", node.id)
             return False
@@ -55,6 +55,7 @@ class Graph:
             # Add an edge from the node to the prompt node.
             self.addEdge(node.promptEdge())
 
+        # The node we got has no image; we need to fetch it from midjourney
         if node.image is None:
             r = makeMidJourneyRequest(
                 "https://www.midjourney.com/api/app/job-status/", "{\"jobIds\":[\""+node.id+"\"]}")
