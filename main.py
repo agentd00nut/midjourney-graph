@@ -14,13 +14,15 @@ app = Dash(__name__)
 NETWORK=visdcc.Network(
     id='net',
     selection={"nodes": [], "edges": []}
-    ,options=dict(height='400px',
+    ,options=dict(
+        height='400px',
         width='100%',
-        layout={'clusterThreshold': 0,
-        'hierarchial': {'enabled': True, 'direction': 'UD', },
-        'edges': {'arrows': {'to': {'enabled': True, 'scaleFactor': 0.5}}},
-        'physics': {'enabled': False, 'barnesHut': {'enabled': True, 'gravitationalConstant': -20000, 'springLength': 100, 'springConstant': 0.1, 'damping': 0.5}}
-    }))
+        nodes={'size':50},
+        edges={'arrows': {'to': {'enabled': True, 'scaleFactor': 1}}},
+        physics={'enabled': True, 'barnesHut': {'enabled': True, 'gravitationalConstant': -20000, 'springLength': 100, 'springConstant': 0.1, 'damping': 0.5}}
+
+    )
+)
 
 
 app.layout = html.Div([
