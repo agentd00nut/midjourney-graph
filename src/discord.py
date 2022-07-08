@@ -4,13 +4,13 @@ from src.node import Node
 
 DISCORD_COOKIE = None
 with open('conf\discord.cookie', 'r') as f:
-    DISCORD_COOKIE = f.read()
+    DISCORD_COOKIE = f.read().strip('\n')
 DISCORD_AUTHORIZATION = None
 with open('conf\discord.authorization', 'r') as f:
-    DISCORD_AUTHORIZATION = f.read()
+    DISCORD_AUTHORIZATION = f.read().strip('\n')
 DISCORD_SESSION = None
 with open('conf\discord.sessionId', 'r') as f:
-    DISCORD_SESSION = f.read()
+    DISCORD_SESSION = f.read().strip('\n')
 
 class DiscordLink:
 
@@ -34,7 +34,7 @@ class DiscordLink:
             "x-debug-options": "bugReporterEnabled",
             "x-discord-locale": "en-US",
         }
-
+        
         response = requests.request("POST", url, json=payload, headers=headers)
 
         return response
@@ -49,11 +49,16 @@ class DiscordLink:
                 type: "variation" or "upsample"
         """
         url = "https://discord.com/api/v9/interactions"
+        
+        channelId = node.job.platform_channel_id
+        if node.job.platform_thread_id is not None:
+            channelId = node.job.platform_thread_id
+         
 
         payload = {
             "type": 3,
             "guild_id": node.job.guild_id,
-            "channel_id": node.job.platform_thread_id,
+            "channel_id": channelId,
             "message_flags": 0,
             "message_id": node.job.platform_message_id,
             # TODO:: Does the application_id rotate on bot deploys?
@@ -64,5 +69,4 @@ class DiscordLink:
                 "custom_id": type
             }
         }
-
         return self.POST(url, payload=payload)
