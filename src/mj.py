@@ -71,7 +71,8 @@ def getRecentJobsForUser(userId, num_jobs, page=1):
 
 def getRunningJobsForUser(userId, num_jobs):
     """
-    Unfortunately the api seems to only update once a minute, so we can't really use this to get the latest jobs.
+    Unfortunately the api seems to only update once a minute, so we can't really use this to get the latest jobs... though we could loop on it in the background every 30 seconds to 
+    do the auto updating.
 
     In theory we could spoof websocket connection to pretend we're a connected client and then issue the interaction request for doing `/info` and then parse the response amidst the noise
     on the socket.... maybe later.
@@ -89,7 +90,7 @@ def getRunningJobsForUser(userId, num_jobs):
     
     global MIDJOURNEY_COOKIE,MIDJOURNEY_HEADERS
     url = "https://www.midjourney.com/api/app/recent-jobs"
-    querystring = {"amount": num_jobs, "orderBy": "enqueueTime", "orderDirection": "orderDirection",
+    querystring = {"amount": num_jobs, "orderBy": "enqueueTime", "orderDirection": "desc",
                 "jobStatus": "running", "userId": userId, "dedupe": "true", "refreshApi": "1", "timeRangeMinutes":"60"}
 
     simple_cookie = http.cookies.SimpleCookie(MIDJOURNEY_COOKIE)

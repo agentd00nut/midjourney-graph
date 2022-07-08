@@ -28,6 +28,7 @@ NETWORK=visdcc.Network(
 
 app.layout = html.Div([
     NETWORK,
+    dcc.Interval(id='interval-component', interval=30*1000, n_intervals=0,),
      html.Div(id='node_info'),
     html.Div(id='configure'),
     html.Div(
@@ -208,8 +209,8 @@ def selectedEdges(x):
 
 @app.callback(
     Output('net', 'data'),
-    [Input('userId', 'value'), Input('numJobs', 'value'), Input('page', 'value'), Input('jobsPerQuery', 'value'), Input('refresh_graph', 'n_clicks')])
-def mainFun(userId, numJobs, page, jobsPerQuery, refresh_graph):
+    [Input('userId', 'value'), Input('numJobs', 'value'), Input('page', 'value'), Input('jobsPerQuery', 'value'), Input('refresh_graph', 'n_clicks'), Input('interval-component', 'n_intervals')])
+def mainFun(userId, numJobs, page, jobsPerQuery, refresh_graph, intervals):
     
     # https://visjs.github.io/vis-network/docs/network/#methodLayout
     
@@ -240,7 +241,8 @@ def mainFun(userId, numJobs, page, jobsPerQuery, refresh_graph):
     # Create a list of *new* nodes from the recent jobs
     nodes = [n for n in [nodeFromJob(jobFromJson(j)) for j in recent_jobs] if not graph.hasNode(n)]
     print("Got", len(nodes), "new nodes from",len(recent_jobs),"recent jobs")
-
+    if(len(nodes) == 0):
+        return graph.getVisDCCData()
     # Add the nodes to the graph
     print("Adding the first round of nodes, not iterating down references")
     for n in nodes:
