@@ -1,4 +1,5 @@
 
+import random
 from time import sleep
 from dash import Dash, html, dcc, callback_context
 from dash.dependencies import Input, Output
@@ -7,7 +8,7 @@ import requests
 from dataclasses import asdict
 from src.discord import DiscordLink
 from src.job import  jobFromJson
-from src.mj import getRecentJobsForUser
+from src.mj import getRecentJobsForUser, getRunningJobsForUser
 from src.node import Node, nodeFromJob
 from src.graph import Graph
 app = Dash(__name__)
@@ -29,7 +30,9 @@ NETWORK=visdcc.Network(
 app.layout = html.Div([
     NETWORK,
     dcc.Interval(id='interval-component', interval=30*1000, n_intervals=0,),
-     html.Div(id='node_info'),
+    dcc.Interval(id='interval-random-job', interval=70*1000, n_intervals=0,),
+    html.Div(id='random_job_id'),
+    html.Div(id='node_info'),
     html.Div(id='configure'),
     html.Div(
         [
@@ -123,6 +126,51 @@ def selection(selections):
     return div
 
 
+# An app callback to run a random variance  from a non-prompt node in the graph as long as we have less than 10 nodes in the results of getRunningJobsForUser
+@app.callback(
+    Output('random_job_id', 'children'),
+    [ Input('interval-random-job', 'n_intervals') ])
+def random_job(n_clicks, ):
+    global graph
+
+    jobs = getRunningJobsForUser(195304009681207296,20)
+    if not jobs:
+        return html.Div([html.H4('failed to get running jobs')])
+    
+    jobs = jobs.json()
+    print("Got recent this many recent jobs: ", len(jobs))
+    if len(jobs) >= 10:
+        print("Too many jobs running to add a random one")
+
+    #get a random node from graph.nodes
+    node = graph.getRandomNode()
+
+    while node is None or node.image is None or node.image=='':
+        node = graph.getRandomNode()
+    
+    if node is None:
+        return html.Div([html.H4('No nodes in graph')])
+    print("Got random node: " + str(node))
+
+    if node.image.endswith('0_0.png'):
+        jobType='MJ::JOB::upsample::'
+    else:
+        jobTypes=['MJ::JOB::variation::', 'MJ::JOB::upsample::']
+        #randomly select a job type from the jobTypes list
+        jobType = random.choice(jobTypes)
+    
+
+    jobNumber = random.choice([1,2,3,4])
+    jobType = jobType + str(jobNumber)
+    DL = DiscordLink()
+    print("Running the random job of type: " + str(jobType) + " with job number: " + str(jobNumber)+ "on node " + str(node.id))
+    result = DL.runJob(node, int(jobNumber), jobType)
+    if not result:
+        return html.Div([html.H3(f"Failed to run {jobType} for {node.id}... reason: {result.text}... repeated failures mean you should probably stop")]) 
+
+    return html.Div([html.H4('Added random job')])
+
+
 variance_lc = -1
 upsample_lc = -1
 reroll_lc = -1
@@ -134,8 +182,6 @@ make_variations_lc = -1
     Output('jobStatus', 'children'),
     [
         Input('net', 'selection'),
-        Input('net','data'),
-        Input('userId', 'value'),
         Input('image_selection', 'value'),
         Input('variance', 'n_clicks'),
         Input('upsample', 'n_clicks'),
@@ -143,7 +189,7 @@ make_variations_lc = -1
         Input('make_variations', 'n_clicks'),
         Input('jobStatus', 'children')
     ])
-def runJob(selections, netData,userId, value, variance, upsample, reroll, make_variations, jobStatus):
+def runJob(selections, value, variance, upsample, reroll, make_variations, jobStatus):
     global graph
     global variance_lc, upsample_lc, reroll_lc, make_variations_lc
 
@@ -233,7 +279,7 @@ def mainFun(userId, numJobs, page, jobsPerQuery, refresh_graph, intervals):
         if result is None or result.status_code != 200:
             print("we got bonked by midjourney api")
             print(result.reason)
-            result.raise_for_status()
+            #result.raise_for_status()
             continue
         recent_jobs.extend(result.json())
         print(len(recent_jobs), page)

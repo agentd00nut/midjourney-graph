@@ -1,4 +1,5 @@
 from dataclasses import asdict
+import random
 from src.job import jobFromJson
 from src.mj import makeMidJourneyRequest
 from src.node import Node, nodeFromJob
@@ -12,6 +13,11 @@ class Graph:
     def __init__(self):
         self.nodes = {}
         self.edges = {}
+
+    def getRandomNode(self):
+        if len(self.nodes) == 0:
+            return None
+        return random.choice(list(self.nodes.values()))
 
     def hasId(self, id: str):
         return id in self.nodes

@@ -61,7 +61,7 @@ def getRecentJobsForUser(userId, num_jobs, page=1):
 
     # Adding running jobs can become problematic.
     querystring = {"amount": num_jobs, "orderBy": "enqueueTime", "jobStatus": "completed", "orderDirection": "desc",
-                   "userId": userId, "dedupe": "true", "page": page}
+                   "userId": userId, "dedupe": "true", "page": page, "jobType": "yfcc_upsample"}
                    
     simple_cookie = http.cookies.SimpleCookie(MIDJOURNEY_COOKIE)
     cookie_jar = requests.cookies.RequestsCookieJar()
