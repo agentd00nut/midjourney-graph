@@ -7,7 +7,7 @@ import requests
 from dataclasses import asdict
 from src.discord import DiscordLink
 from src.job import  jobFromJson
-from src.mj import getRecentJobsForUser, getRunningJobsForUser
+from src.mj import getRecentJobsForUser
 from src.node import Node, nodeFromJob
 from src.graph import Graph
 app = Dash(__name__)
@@ -54,7 +54,7 @@ app.layout = html.Div([
                 dcc.Input(id='userId',
                           placeholder='Enter a user Id ...',
                           type='text',
-                          value=''),
+                          value='195304009681207296'),
                 'numberOfJobs:',
                 dcc.Input(id='numJobs',
                           placeholder='Enter a max number of jobs',
@@ -186,12 +186,13 @@ def runJob(selections, netData,userId, value, variance, upsample, reroll, make_v
         #       Technically i think we could /show the job into one of our available threads or the DM with the bot, but that starts moving into the spoofed web socket territory again....
         return html.Div([html.H3(f"Failed to run {jobType} for {node.id}... reason: {result.text}... repeated failures mean you should probably stop")]) 
 
+    # # TODO: Until the placeholders show up right away and get removed when the job comes in, they are just annoying.
+    # # TODO: Reference image num will be wrong for upsample placeholder jobs
+    # placeholder = Node(jobType+node.id, "im a placeholder", node.id, value, node.prompt, jobType, "", node.shape,  False, False, None )
+    # graph.addNode(placeholder)
+    # graph.addEdge(placeholder.referenceEdge())
+    # netData = graph.getVisDCCData()
 
-    # TODO: Reference image num will be wrong for upsample placeholder jobs
-    placeholder = Node(jobType+node.id, "im a placeholder", node.id, value, node.prompt, jobType, "", node.shape,  False, False, None )
-    graph.addNode(placeholder)
-    graph.addEdge(placeholder.referenceEdge())
-    netData = graph.getVisDCCData()
     return  html.Div([html.H3(f"Started {jobType} for {node.id}")])
 
 
@@ -239,7 +240,7 @@ def mainFun(userId, numJobs, page, jobsPerQuery, refresh_graph, intervals):
         page += 1
 
     # Create a list of *new* nodes from the recent jobs
-    nodes = [n for n in [nodeFromJob(jobFromJson(j)) for j in recent_jobs] if not graph.hasNode(n)]
+    nodes = [n for n in [nodeFromJob(jobFromJson(j)) for j in recent_jobs] if not graph.hasNode(n) or graph.getNode(n.id).image is None]
     print("Got", len(nodes), "new nodes from",len(recent_jobs),"recent jobs")
     if(len(nodes) == 0):
         return graph.getVisDCCData()

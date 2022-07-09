@@ -59,8 +59,9 @@ def getRecentJobsForUser(userId, num_jobs, page=1):
     if page == 0:
         page = 1
 
-    querystring = {"amount": num_jobs, "orderBy": "enqueueTime", "orderDirection": "desc",
-                   "jobStatus": "completed", "userId": userId, "dedupe": "true", "refreshApi": "0", "page": page}
+    # Adding running jobs can become problematic.
+    querystring = {"amount": num_jobs, "orderBy": "enqueueTime", "jobStatus": "completed", "orderDirection": "desc",
+                   "userId": userId, "dedupe": "true", "page": page}
                    
     simple_cookie = http.cookies.SimpleCookie(MIDJOURNEY_COOKIE)
     cookie_jar = requests.cookies.RequestsCookieJar()
@@ -91,7 +92,7 @@ def getRunningJobsForUser(userId, num_jobs):
     global MIDJOURNEY_COOKIE,MIDJOURNEY_HEADERS
     url = "https://www.midjourney.com/api/app/recent-jobs"
     querystring = {"amount": num_jobs, "orderBy": "enqueueTime", "orderDirection": "desc",
-                "jobStatus": "running", "userId": userId, "dedupe": "true", "refreshApi": "1", "timeRangeMinutes":"60"}
+                "jobStatus": "running", "userId": userId, "dedupe": "true", "timeRangeMinutes":"60"}
 
     simple_cookie = http.cookies.SimpleCookie(MIDJOURNEY_COOKIE)
     cookie_jar = requests.cookies.RequestsCookieJar()
