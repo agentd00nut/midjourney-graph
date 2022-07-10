@@ -30,7 +30,7 @@ NETWORK=visdcc.Network(
 app.layout = html.Div([
     NETWORK,
     dcc.Interval(id='interval-component', interval=30*1000, n_intervals=0,),
-    dcc.Interval(id='interval-random-job', interval=70*1000, n_intervals=0,),
+    dcc.Interval(id='interval-random-job', interval=150*1000, n_intervals=0,),
     html.Div(id='random_job_id'),
     html.Div(id='node_info'),
     html.Div(id='configure'),
@@ -57,16 +57,15 @@ app.layout = html.Div([
                 dcc.Input(id='userId',
                           placeholder='Enter a user Id ...',
                           type='text',
-                          value='195304009681207296'),
+                          value=''),
                 'numberOfJobs:',
                 dcc.Input(id='numJobs',
                           placeholder='Enter a max number of jobs',
                           type='number',
                           name='numJobs',
                           min=1,
-                          max=100,
                           debounce=True,
-                          value=10),
+                          value=200),
                 'jobsPerQuery:',
                 dcc.Input(id='jobsPerQuery',
                           placeholder='Jobs per query',
@@ -74,7 +73,7 @@ app.layout = html.Div([
                           debounce=True,
                           min=1,
                           max=100,
-                          value=10),
+                          value=100),
                 'Start Page:',
                 dcc.Input(id='page',
                           placeholder='Enter a page number to start on, 0 is first...',
@@ -133,13 +132,22 @@ def selection(selections):
 def random_job(n_clicks, ):
     global graph
 
+    node = graph.getRandomNode()
+
+    if node is None:
+        return html.Div([html.H4('No nodes in graph')])
+
     jobs = getRunningJobsForUser(195304009681207296,20)
     if not jobs:
         return html.Div([html.H4('failed to get running jobs')])
     
     jobs = jobs.json()
+
+    # while  len(jobs) < 10:
+
+        # jobs = getRunningJobsForUser(195304009681207296,20).json()
     print("Got recent this many recent jobs: ", len(jobs))
-    if len(jobs) >= 10:
+    if len(jobs) >= 7: # lazy way to deal with delays in the api
         print("Too many jobs running to add a random one")
 
     #get a random node from graph.nodes
@@ -152,16 +160,17 @@ def random_job(n_clicks, ):
         return html.Div([html.H4('No nodes in graph')])
     print("Got random node: " + str(node))
 
-    if node.image.endswith('0_0.png'):
-        jobType='MJ::JOB::upsample::'
+    if len(node.job.image_paths)<4:
+        jobType='MJ::JOB::variation::1::SOLO'
+        jobNumber=1
     else:
         jobTypes=['MJ::JOB::variation::', 'MJ::JOB::upsample::']
         #randomly select a job type from the jobTypes list
         jobType = random.choice(jobTypes)
-    
+        jobNumber = random.choice([1,2,3,4])
+        jobType = jobType + str(jobNumber)
 
-    jobNumber = random.choice([1,2,3,4])
-    jobType = jobType + str(jobNumber)
+    
     DL = DiscordLink()
     print("Running the random job of type: " + str(jobType) + " with job number: " + str(jobNumber)+ "on node " + str(node.id))
     result = DL.runJob(node, int(jobNumber), jobType)
