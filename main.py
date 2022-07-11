@@ -30,7 +30,7 @@ NETWORK=visdcc.Network(
 app.layout = html.Div([
     NETWORK,
     dcc.Interval(id='interval-component', interval=30*1000, n_intervals=0,),
-    dcc.Interval(id='interval-random-job', interval=150*1000, n_intervals=0,),
+    dcc.Interval(id='interval-random-job', interval=120*1000, n_intervals=0,),
     html.Div(id='random_job_id'),
     html.Div(id='node_info'),
     html.Div(id='configure'),
@@ -57,7 +57,7 @@ app.layout = html.Div([
                 dcc.Input(id='userId',
                           placeholder='Enter a user Id ...',
                           type='text',
-                          value=''),
+                          value='195304009681207296'),
                 'numberOfJobs:',
                 dcc.Input(id='numJobs',
                           placeholder='Enter a max number of jobs',
@@ -65,7 +65,7 @@ app.layout = html.Div([
                           name='numJobs',
                           min=1,
                           debounce=True,
-                          value=200),
+                          value=1),
                 'jobsPerQuery:',
                 dcc.Input(id='jobsPerQuery',
                           placeholder='Jobs per query',
@@ -73,7 +73,7 @@ app.layout = html.Div([
                           debounce=True,
                           min=1,
                           max=100,
-                          value=100),
+                          value=1),
                 'Start Page:',
                 dcc.Input(id='page',
                           placeholder='Enter a page number to start on, 0 is first...',
@@ -81,7 +81,8 @@ app.layout = html.Div([
                           debounce=True,
                           min=0,
                           value=0),
-                html.Button('Refresh_Graph', id='refresh_graph',name='refresh_graph_button')
+                html.Button('Refresh_Graph', id='refresh_graph',name='refresh_graph_button'),
+                html.Button('Random_Job', id='random_job',name='randomb_job_button')
                 ]),
 
     ]),
@@ -128,8 +129,8 @@ def selection(selections):
 # An app callback to run a random variance  from a non-prompt node in the graph as long as we have less than 10 nodes in the results of getRunningJobsForUser
 @app.callback(
     Output('random_job_id', 'children'),
-    [ Input('interval-random-job', 'n_intervals') ])
-def random_job(n_clicks, ):
+    [ Input('interval-random-job', 'n_intervals'), Input('random_job','n_clicks') ])
+def random_job(n_intervals, n_clicks):
     global graph
 
     node = graph.getRandomNode()
@@ -153,31 +154,38 @@ def random_job(n_clicks, ):
     #get a random node from graph.nodes
     node = graph.getRandomNode()
 
-    while node is None or node.image is None or node.image=='':
+    while node is None or node.image is None or node.image=='' or len(node.job.image_paths)!=4: # currently disabled for upsamples
         node = graph.getRandomNode()
     
     if node is None:
         return html.Div([html.H4('No nodes in graph')])
     print("Got random node: " + str(node))
 
-    if len(node.job.image_paths)<4:
+
+
+    if len(node.job.image_paths)==1: #  upsample
         jobType='MJ::JOB::variation::1::SOLO'
         jobNumber=1
-    else:
+    elif len(node.job.image_paths)==4: # variation
         jobTypes=['MJ::JOB::variation::', 'MJ::JOB::upsample::']
         #randomly select a job type from the jobTypes list
         jobType = random.choice(jobTypes)
         jobNumber = random.choice([1,2,3,4])
         jobType = jobType + str(jobNumber)
+    elif node.reference_job_id is not None: # root node
+        jobType='MJ::JOB::reroll::0::SOLO'
+        jobNumber=0
+    
+
 
     
     DL = DiscordLink()
     print("Running the random job of type: " + str(jobType) + " with job number: " + str(jobNumber)+ "on node " + str(node.id))
-    result = DL.runJob(node, int(jobNumber), jobType)
+    result = DL.runJob(node,  jobType)
     if not result:
         return html.Div([html.H3(f"Failed to run {jobType} for {node.id}... reason: {result.text}... repeated failures mean you should probably stop")]) 
 
-    return html.Div([html.H4('Added random job')])
+    return html.Div([html.H4(f"Added {jobType} job for {node.id}")])
 
 
 variance_lc = -1
@@ -235,7 +243,7 @@ def runJob(selections, value, variance, upsample, reroll, make_variations, jobSt
 
     DL = DiscordLink()
 
-    result = DL.runJob(node, int(value), jobType)
+    result = DL.runJob(node,  jobType)
     if not result:
         # TODO:: The reason some (most) jobs fail is the new limited roles in the discord... We could try and detect this and present an option to just roll the full command of the job to "own" it... maybe also optionally using the image as an input.
         #       Technically i think we could /show the job into one of our available threads or the DM with the bot, but that starts moving into the spoofed web socket territory again....

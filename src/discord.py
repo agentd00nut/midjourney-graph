@@ -39,7 +39,7 @@ class DiscordLink:
 
         return response
 
-    def runJob(self, node: Node, number: int, type: str):
+    def runJob(self, node: Node,  type: str):
         """
         Send a message to the Discord channel.
 

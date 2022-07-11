@@ -4,7 +4,7 @@ from src.job import jobFromJson
 from src.mj import makeMidJourneyRequest
 from src.node import Node, nodeFromJob
 from src.edge import Edge
-
+import secrets
 
 class Graph:
     nodes: dict[str, Node]
@@ -15,9 +15,11 @@ class Graph:
         self.edges = {}
 
     def getRandomNode(self):
-        if len(self.nodes) == 0:
+        n = len(self.nodes)
+        if n == 0:
             return None
-        return random.choice(list(self.nodes.values()))
+        
+        return(list(self.nodes.values()))[secrets.randbelow(n)]
 
     def hasId(self, id: str):
         return id in self.nodes
