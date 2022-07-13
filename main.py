@@ -30,7 +30,7 @@ NETWORK=visdcc.Network(
 app.layout = html.Div([
     NETWORK,
     dcc.Interval(id='interval-component', interval=30*1000, n_intervals=0,),
-    dcc.Interval(id='interval-random-job', interval=120*1000, n_intervals=0,),
+    dcc.Interval(id='interval-random-job', interval=120*1000, n_intervals=0,disabled=True), # Set disabled=False if you want to try the random job feature... 
     html.Div(id='random_job_id'),
     html.Div(id='node_info'),
     html.Div(id='configure'),
