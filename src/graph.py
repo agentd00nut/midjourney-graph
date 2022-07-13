@@ -1,8 +1,10 @@
+from dataclasses import asdict
+import random
 from src.job import jobFromJson
 from src.mj import makeMidJourneyRequest
 from src.node import Node, nodeFromJob
 from src.edge import Edge
-
+import secrets
 
 class Graph:
     nodes: dict[str, Node]
@@ -11,6 +13,13 @@ class Graph:
     def __init__(self):
         self.nodes = {}
         self.edges = {}
+
+    def getRandomNode(self):
+        n = len(self.nodes)
+        if n == 0:
+            return None
+        
+        return(list(self.nodes.values()))[secrets.randbelow(n)]
 
     def hasId(self, id: str):
         return id in self.nodes
@@ -39,7 +48,7 @@ class Graph:
     def addNode(self, node: Node):
         print("addNode", node.id, node.reference_job_id)
 
-        # Check if the node already exists and has an image.
+        # Check if the node already exists and has an image and has a non 0 accumulated_duration ()
         if self.hasNode(node) and self.nodes[node.id].image is not None:
             print(" node already exists", node.id)
             return False
@@ -55,6 +64,7 @@ class Graph:
             # Add an edge from the node to the prompt node.
             self.addEdge(node.promptEdge())
 
+        # The node we got has no image; we need to fetch it from midjourney
         if node.image is None:
             r = makeMidJourneyRequest(
                 "https://www.midjourney.com/api/app/job-status/", "{\"jobIds\":[\""+node.id+"\"]}")
@@ -116,3 +126,8 @@ class Graph:
                 break
 
             node = referance_node
+
+
+    def getVisDCCData(self):
+        return {'nodes': [asdict(self.nodes[n]) for n in self.nodes], 'edges': [
+        self.edges[e].asGraphEdge() for e in self.edges]}

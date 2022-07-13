@@ -1,5 +1,7 @@
 # MidJourney Graph
 
+![An image showing the graph based UI](/example.png)
+
 Shows the graph of recent jobs run by the provider userID for midjourney.
 
 Also provides an interface to issue commands to the midjourney bot by hitting the discord API, discord might frown on that behavior though, use those buttons at your own risk.
@@ -87,10 +89,11 @@ Also grab the `authorization` string and put it into `conf/discord.authorization
 Lastly grab the `sessionId` string and put it into `conf/discord.sessionId`, make the file if it does not exist
 
 # Known issues
+
 - It's possible for a job from the midjourney api to come back with null's for the channel, thread, and message... usually this happens right before outages
-When it does it's problematic for obvious reasons.  A possible solution would be to use `/show` on the id in a known channel (DM to the bot?);  Another 
-would be to check if `/interaction` requests can be performed outside the channel that the bot knows an image is in before using `/show`.  Unfortunately none of these
-*update* the job information coming from the api
+  When it does it's problematic for obvious reasons. A possible solution would be to use `/show` on the id in a known channel (DM to the bot?); Another
+  would be to check if `/interaction` requests can be performed outside the channel that the bot knows an image is in before using `/show`. Unfortunately none of these
+  _update_ the job information coming from the api
 
 # TODO
 
@@ -98,6 +101,7 @@ Vaguely in order.
 
 ## Important
 
+- [] The api can return jobs that are "invalid"; having no guild or channel or thread or message values that are otherwise "real"... so our variation requests will always fail; we should make these with a red border or some other indicator of "hey midjourney kinda donked up the data on this one"
 - [] Support less... dumb, ways of getting the necessary cookies for midj and discord.
 - [] Accept just username+Password for discord and automatically the cookies / auths we need.
 - [] Support for 2fa on discord logins.

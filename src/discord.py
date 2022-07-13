@@ -39,7 +39,7 @@ class DiscordLink:
 
         return response
 
-    def runJob(self, node: Node, number: int, type: str):
+    def runJob(self, node: Node,  type: str):
         """
         Send a message to the Discord channel.
 
@@ -68,5 +68,6 @@ class DiscordLink:
                 "component_type": 2,
                 "custom_id": type
             }
-        }
+        } 
+        print(payload)
         return self.POST(url, payload=payload)

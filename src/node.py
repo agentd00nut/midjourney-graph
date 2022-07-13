@@ -56,7 +56,6 @@ class Node:
         if self.job is not None:
             # 662267976984297473 == guild_id
             return f"https://discord.com/channels/662267976984297473/{self.job.platform_thread_id}/{self.job.platform_message_id}"
-        print("hmmm that's no good boi")
         return None
 
 
