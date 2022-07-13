@@ -129,16 +129,16 @@ def selection(selections):
 # An app callback to run a random variance  from a non-prompt node in the graph as long as we have less than 10 nodes in the results of getRunningJobsForUser
 @app.callback(
     Output('random_job_id', 'children'),
-    [ Input('interval-random-job', 'n_intervals'), Input('random_job','n_clicks') ])
-def random_job(n_intervals, n_clicks):
+    [ Input('interval-random-job', 'n_intervals'), Input('random_job','n_clicks'), Input('userId','value') ])
+def random_job(n_intervals, n_clicks, userId):
     global graph
-
+    print("RANDOM JOB")
     node = graph.getRandomNode()
 
     if node is None:
         return html.Div([html.H4('No nodes in graph')])
 
-    jobs = getRunningJobsForUser(195304009681207296,20)
+    jobs = getRunningJobsForUser(userId,20)
     if not jobs:
         return html.Div([html.H4('failed to get running jobs')])
     
