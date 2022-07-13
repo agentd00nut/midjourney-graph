@@ -1,5 +1,7 @@
 # MidJourney Graph
 
+![An image showing the graph based UI](/example.png)
+
 Shows the graph of recent jobs run by the provider userID for midjourney.
 
 Also provides an interface to issue commands to the midjourney bot by hitting the discord API, discord might frown on that behavior though, use those buttons at your own risk.
