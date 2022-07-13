@@ -57,7 +57,7 @@ app.layout = html.Div([
                 dcc.Input(id='userId',
                           placeholder='Enter a user Id ...',
                           type='text',
-                          value='195304009681207296'),
+                          value=''),  #Add your midjourney userid here
                 'numberOfJobs:',
                 dcc.Input(id='numJobs',
                           placeholder='Enter a max number of jobs',
