@@ -29,10 +29,10 @@ class Node:
         self.job = j
 
     def promptNode(self):
-        return Node(id=self.prompt, image=None, reference_job_id=None, reference_image_num=None, shape="text", prompt=self.prompt, label=self.prompt, full_command=self.full_command, isPromptNode=True, job=self.job)
+        return Node(id=self.full_command, image=None, reference_job_id=None, reference_image_num=None, shape="text", prompt=self.prompt, label=self.prompt, full_command=self.full_command, isPromptNode=True, job=self.job)
 
     def promptEdge(self):
-        return Edge(id=self.prompt+"|"+self.id, from_=self.prompt, to=self.id)
+        return Edge(id=(self.full_command+"|"+self.id).__hash__(), from_=self.full_command, to=self.id)
 
     def getReferenceNodeNoRequest(self):
         if self.reference_job_id is not None:
