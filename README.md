@@ -24,6 +24,8 @@ Pretty self explanitory, the slider next to the job buttons goes from 1-4.
 
 To run a V4 job, select a node, move the slider all the way right and hit the `V<>` button.
 
+You can omit the discord configuration files and just use the graph as a visual aid... the "goto discord" button _should_ still work.
+
 ## Midjourney API inputs
 
 You can change the defaults in the obvious places within `main.py` right at the top of the file.
@@ -108,19 +110,23 @@ Vaguely in order.
 
 ## Optimizations
 
-- [] Make an initial pass of reference jobs to remove jobs already in our graph, before starting the depth first search of referral jobs. Could reduce calls to midjourney api with larger "jobsPerQuery" settings.
-- [] Modify the referral job loop to work on the next "set" of referral jobs as one unit instead of walking depth first down a nodes referral chain... Much faster, and utilizes that the job-status api accepts an array of nodes!
+- [x] ~Make an initial pass of reference jobs to remove jobs already in our graph, before starting the depth first search of referral jobs. Could reduce calls to midjourney api with larger "jobsPerQuery" settings.~
+- [x] ~Modify the referral job loop to work on the next "set" of referral jobs as one unit instead of walking depth first down a nodes referral chain... Much faster, and utilizes that the job-status api accepts an array of nodes!~
 
 ## Features
 
+- [] Imagine prompt input
+- [] Prompt input from files
+- [] Prompt "mixing", prompts from the left file, permutate with modifiers in right file.
+- [] "Job" / "pattern" system... "All prompt nodes with <10 predecessors, re-run." "All prompt nodes with >=10 predecessors, ensure they have run a v1,v2,v3,v4 job."... Ideally this would be a kind of query language syntax
 - [] Max-upscale button (unsure how to know if available)
 - [] **Option to automatically move to `/fast` mode when issuing a "max upscale" command while in `/relax` state.**
 - [] Fast / Relax buttons + show current state.
 - [] Automatically add nodes for issued jobs / "running" nodes, update with progress images if possible.
-- [] Show all running jobs status
+- [x] Show all running jobs status (tried to do this; technically it "works" but MJ only updates once a minute from the bot, so it can really lag our knowledge of running jobs etc.)
 - [] Any sort of "running" indicator
 - [] A second graph view (ideally within the same viewport) showing the chain of reference images for the selected node. (All the nodes would _only_ be the image referenced and not the 2x2 grids)
-- [] Hosting (obviously requires the better login managmenet)
+- [] Hosted (obviously requires the better login managmenet)
 
 ## Unlikely to happen
 

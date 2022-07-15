@@ -9,4 +9,4 @@ class Edge:
     label: str = field(default="")
 
     def asGraphEdge(self):
-        return {'id': self.id, 'from': self.from_, 'to': self.to, 'label': self.label}
+        return {"id": self.id, "from": self.from_, "to": self.to, "label": self.label}

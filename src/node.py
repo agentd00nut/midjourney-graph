@@ -1,63 +1,158 @@
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, astuple, dataclass, field
 from hashlib import md5
+from typing import Type
 
 from src.edge import Edge
 from src.job import Job, jobFromJson
-from src.mj import makeMidJourneyRequest
+from src.mj import mj_POST
+
+from enum import Enum
 
 
-@dataclass
+class NodeType(Enum):
+    variation = "variation"
+    upsample = "upsample"
+    prompt = "prompt"
+    reference = "reference"
+
+
+@dataclass(order=True)
 class Node:
     """Keeps a simplified representation of a job in midjourney to be shown."""
-    id: str
-    image: str | None
-    reference_job_id: str | None
-    reference_image_num: str | None
-    prompt: str
-    label: str
-    full_command: str
+
+    id: str = field(default_factory=lambda: "")
+    image: str | None = field(default_factory=lambda: "")
+    reference_job_id: str | None = field(default_factory=lambda: None)
+    reference_image_num: str | None = field(default_factory=lambda: None)
+    prompt: str | None = field(default_factory=lambda: None)
+    label: str | None = field(default_factory=lambda: None)
+    full_command: str | None = field(default_factory=lambda: None)
     shape: str = "image"
-    isPromptNode: bool = False
-    isReferenceNode: bool = False
     job: Job = None
+    type: NodeType = field(default_factory=lambda: NodeType.variation)
 
     def __post_init__(self):
-        if self.isPromptNode:
-            self.label = self.full_command
+        self.node = (
+            self  # ensures we store the Node when adding to nGraph during expansion
+        )
 
-    def setJob(self, j):
-        self.job = j
+    def getTruncatedFullCommand(self):
+        x = self.full_command.split(
+            ">"
+        )  # TODO:: this is totally going to bomb unless MJ always prepends image prompts to full command strings instead of where they show up in the prompt, a better solution would be to
+        return (
+            x[1][1:] if len(x) > 1 else x[0]
+        )  # x[1][1:]... the [1:] removes the trailing space left after the split
 
-    def promptNode(self):
-        return Node(id=self.full_command, image=None, reference_job_id=None, reference_image_num=None, shape="text", prompt=self.prompt, label=self.prompt, full_command=self.full_command, isPromptNode=True, job=self.job)
+    def getPromptNode(self):
+        return Node(
+            id=self.getTruncatedFullCommand(),
+            shape="ellipse",
+            prompt=self.prompt,
+            label=self.getTruncatedFullCommand(),
+            full_command=self.full_command,
+            job=None,
+            type=NodeType.prompt,
+        )
 
-    def promptEdge(self):
-        return Edge(id=(self.full_command+"|"+self.id).__hash__(), from_=self.full_command, to=self.id)
+    def getPromptEdge(self):
+        return Edge(
+            id=self.prompt + "|" + self.id,
+            from_=self.getTruncatedFullCommand(),
+            to=self.id,
+            label="",
+        )
 
     def getReferenceNodeNoRequest(self):
         if self.reference_job_id is not None:
-            return Node(id=self.reference_job_id, image=None, reference_job_id=None, reference_image_num=None, shape="text", prompt=self.prompt, label=self.prompt, full_command=self.full_command, isReferenceNode=True, job=self.job)
+            return Node(
+                id=self.reference_job_id,
+                shape="text",
+                prompt=self.prompt,
+                label=self.reference_job_id,
+                full_command=self.full_command,
+                job=self.job,
+                type=NodeType.reference,
+            )
         return None
 
-    def getReferenceNode(self):
+    def getReferenceEdge(self):
         if self.reference_job_id is not None:
-            r = makeMidJourneyRequest(
-                "https://www.midjourney.com/api/app/job-status/", "{\"jobIds\":[\""+self.reference_job_id+"\"]}")
-            job = jobFromJson(r.json()[0])
-            return nodeFromJob(job)
+            label = (
+                str(int(self.reference_image_num) + 1)
+                if self.reference_image_num is not None
+                else None
+            )
+            return Edge(
+                id=self.reference_job_id + "|" + self.id,
+                from_=self.reference_job_id,
+                to=self.id,
+                label=label,
+            )
 
-    def referenceEdge(self):
-        if self.reference_job_id is not None:
-            label = str(int(self.reference_image_num) +
-                        1) if self.reference_image_num is not None else None
-            return Edge(id=self.id[0:4]+"|"+self.reference_job_id[0:4], from_=self.reference_job_id, to=self.id, label=label)
-
-    def gotoDiscord(self):
+    def getDiscordLink(self):
         if self.job is not None:
             # 662267976984297473 == guild_id
             return f"https://discord.com/channels/662267976984297473/{self.job.platform_thread_id}/{self.job.platform_message_id}"
         return None
 
+    def __hash__(self):
+        """Uses the id of the node (from midjourney) as the hash, letting us add it into nxgraphs"""
+        return self.id.__hash__()
+
+    def asvisDCCData(self):
+        return {
+            "id": self.id,
+            "shape": self.shape,
+            "image": self.image,
+            # "reference_job_id": self.reference_job_id,
+            # "reference_image_num": self.reference_image_num,
+            "prompt": self.prompt,
+            "label": self.label,
+            "type": str(self.type),
+        }
+
+    # def __getitem__(self,key):
+    #     """Allows unpacking the Node as the attributes to a Node in a nxgraph easily!"""
+    #     return self.__getattribute__(key)
+
+    def __add__(self, other):
+        """
+        Allows adding two nodes together to make a new node, only if their ids are equivilent, otherwise throws an exception.
+
+        The new node will contain a mix of data from both nodes, always prefering to take data that is not None, null, or empty.
+
+        If an attribute is equivilent between the two Nodes then it will prefer the self attribute.
+        """
+        if self.id != other.id:
+            raise Exception("Nodes must have the same id to be added together!")
+        return Node(
+            id=self.id,
+            image=self.image or other.image,
+            reference_job_id=self.reference_job_id or other.reference_job_id,
+            reference_image_num=self.reference_image_num or other.reference_image_num,
+            prompt=self.prompt or other.prompt,
+            label=self.label or other.label,
+            full_command=self.full_command or other.full_command,
+            job=self.job or other.job,
+            type=self.type or other.type,
+        )
+
 
 def nodeFromJob(job: Job):
-    return Node(id=job.id, image=job.image, reference_job_id=job.reference_job_id, reference_image_num=job.reference_image_num, prompt=job.prompt, label=job.id, full_command=job.full_command, shape="image", job=job)
+    """Converts a job to a node."""
+    nodeType = (
+        NodeType.upsample if job.jobType == "yfcc_upsample" else NodeType.variation
+    )
+    return Node(
+        id=job.id,
+        image=job.image,
+        reference_job_id=job.reference_job_id,
+        reference_image_num=job.reference_image_num,
+        prompt=job.prompt,
+        label=job.id,
+        full_command=job.full_command,
+        shape="image",
+        job=job,
+        type=nodeType,
+    )

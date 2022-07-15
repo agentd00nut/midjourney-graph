@@ -1,19 +1,26 @@
-
 import requests
 from src.node import Node
 
 DISCORD_COOKIE = None
-with open('conf\discord.cookie', 'r') as f:
-    DISCORD_COOKIE = f.read().strip('\n')
 DISCORD_AUTHORIZATION = None
-with open('conf\discord.authorization', 'r') as f:
-    DISCORD_AUTHORIZATION = f.read().strip('\n')
 DISCORD_SESSION = None
-with open('conf\discord.sessionId', 'r') as f:
-    DISCORD_SESSION = f.read().strip('\n')
+
+try:
+    with open("conf\discord.cookie", "r") as f:
+        DISCORD_COOKIE = f.read().strip("\n")
+
+    with open("conf\discord.authorization", "r") as f:
+        DISCORD_AUTHORIZATION = f.read().strip("\n")
+
+    with open("conf\discord.sessionId", "r") as f:
+        DISCORD_SESSION = f.read().strip("\n")
+except FileNotFoundError:
+    print(
+        "Error: discord.cookie, discord.authorization, or discord.sessionId not found... dont try to run a job"
+    )
+
 
 class DiscordLink:
-
     def POST(self, url: str, payload: dict):
         global DISCORD_COOKIE
 
@@ -34,12 +41,12 @@ class DiscordLink:
             "x-debug-options": "bugReporterEnabled",
             "x-discord-locale": "en-US",
         }
-        
+
         response = requests.request("POST", url, json=payload, headers=headers)
 
         return response
 
-    def runJob(self, node: Node,  type: str):
+    def runJob(self, node: Node, type: str):
         """
         Send a message to the Discord channel.
 
@@ -49,11 +56,14 @@ class DiscordLink:
                 type: "variation" or "upsample"
         """
         url = "https://discord.com/api/v9/interactions"
-        
+
         channelId = node.job.platform_channel_id
         if node.job.platform_thread_id is not None:
             channelId = node.job.platform_thread_id
-         
+
+        if DISCORD_SESSION is None:
+            print("Error: discord.sessionId not found... dont try to run a job")
+            return
 
         payload = {
             "type": 3,
@@ -63,11 +73,8 @@ class DiscordLink:
             "message_id": node.job.platform_message_id,
             # TODO:: Does the application_id rotate on bot deploys?
             "application_id": "936929561302675456",
-            "session_id": DISCORD_SESSION,  
-            "data": {
-                "component_type": 2,
-                "custom_id": type
-            }
-        } 
+            "session_id": DISCORD_SESSION,
+            "data": {"component_type": 2, "custom_id": type},
+        }
         print(payload)
         return self.POST(url, payload=payload)

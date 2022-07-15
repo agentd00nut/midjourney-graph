@@ -3,3 +3,4 @@ ac.ps1
 test.json
 __pycache__
 .venv
+.pytest_cache
