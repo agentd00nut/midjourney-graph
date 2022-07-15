@@ -6,13 +6,13 @@ from src.graph import Graph
 from src.mj import getRunningJobsForUser
 
 
-def random_job(graph: Graph):
+def random_job(graph: Graph,userId:str):
     node = graph.getRandomNode()
 
     if node is None:
         return html.Div([html.H4("No nodes in graph")])
 
-    jobs = getRunningJobsForUser(195304009681207296, 20)
+    jobs = getRunningJobsForUser(userId, 20)
     if not jobs:
         return html.Div([html.H4("failed to get running jobs")])
 
