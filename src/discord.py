@@ -4,6 +4,7 @@ from src.node import Node
 DISCORD_COOKIE = None
 DISCORD_AUTHORIZATION = None
 DISCORD_SESSION = None
+DISCORD_CHANNEL = None
 
 try:
     with open("conf\discord.cookie", "r") as f:
@@ -14,6 +15,9 @@ try:
 
     with open("conf\discord.sessionId", "r") as f:
         DISCORD_SESSION = f.read().strip("\n")
+
+    with open("conf\discord.channel", "r") as f:
+        DISCORD_CHANNEL = f.read().strip("\n")
 except FileNotFoundError:
     print(
         "Error: discord.cookie, discord.authorization, or discord.sessionId not found... dont try to run a job"
@@ -90,11 +94,10 @@ class DiscordLink:
         if DISCORD_SESSION is None:
             print("Error: discord.sessionId not found... dont try to run a job")
             return None
-
         payload = {
             "type": 2,
             "guild_id": 662267976984297473,
-            "channel_id": 998873133933150248,  # TODO:: Better channel handling for /imagine prompts
+            "channel_id": DISCORD_CHANNEL,  # TODO:: Better channel handling for /imagine prompts
             "application_id": "936929561302675456",
             "session_id": DISCORD_SESSION,
             "data": {
