@@ -115,13 +115,14 @@ Vaguely in order.
 
 ## Features
 
-- [] Imagine prompt input
+- [] "list" view; start with just listing the previous jobs prompts; optionally with the job buttons; maybe show jobs image on hover?
+- [x] Imagine prompt input
 - [] Prompt input from files
-- [] Prompt "mixing", prompts from the left file, permutate with modifiers in right file.
+- [x] Prompt "mixing", prompts from the left file, permutate with modifiers in right file.
 - [] "Job" / "pattern" system... "All prompt nodes with <10 predecessors, re-run." "All prompt nodes with >=10 predecessors, ensure they have run a v1,v2,v3,v4 job."... Ideally this would be a kind of query language syntax
-- [] Max-upscale button (unsure how to know if available)
-- [] **Option to automatically move to `/fast` mode when issuing a "max upscale" command while in `/relax` state.**
-- [] Fast / Relax buttons + show current state.
+- [x] Max-upscale button (unsure how to know if available)
+- [x] **Option to automatically move to `/fast` mode when issuing a "max upscale" command while in `/relax` state.**
+- [x] Fast / Relax buttons + show current state.
 - [] Automatically add nodes for issued jobs / "running" nodes, update with progress images if possible.
 - [x] Show all running jobs status (tried to do this; technically it "works" but MJ only updates once a minute from the bot, so it can really lag our knowledge of running jobs etc.)
 - [] Any sort of "running" indicator

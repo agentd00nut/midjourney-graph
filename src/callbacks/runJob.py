@@ -18,6 +18,7 @@ def runJob(
     if len(selections["nodes"]) == 0:
         return jobStatus
     # https://dash.plotly.com/dash-html-components/button
+    print(callback_context.triggered)
     changed_id: str = [p["prop_id"] for p in callback_context.triggered][0]
     jobType = ""
     if changed_id.startswith("variance"):
@@ -54,7 +55,7 @@ def runJob(
         #       Technically i think we could /show the job into one of our available threads or the DM with the bot, but that starts moving into the spoofed web socket territory again....
         return html.Div(
             [
-                html.H3(
+                html.P(
                     f"Failed to run {jobType} for {node['id']}... reason: {result.text}... repeated failures mean you should probably stop"
                 )
             ]
@@ -67,4 +68,4 @@ def runJob(
     # graph.addEdge(placeholder.referenceEdge())
     # netData = graph.getVisDCCData()
 
-    return html.Div([html.H3(f"Started {jobType} for {node['id']}")])
+    return html.Div([html.P(f"Started {jobType} for {node['id']}")])

@@ -46,7 +46,6 @@ def selection(graph: nGraph, selections):
             "flex-direction": "column",
             "justify-content": "center",
             "align-items": "center",
-            "height": "350px",
         },
     )
 

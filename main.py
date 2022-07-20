@@ -1,6 +1,7 @@
 from dataclasses import asdict
+from pdb import lasti2lineno
 from time import sleep
-from dash import Dash, html, dcc, Input, Output, callback
+from dash import Dash, html, dcc, Input, Output, callback, State
 from dash.dependencies import Input, Output
 import networkx as nx
 
@@ -9,10 +10,10 @@ from src.callbacks.runJob import runJob
 from src.callbacks.selection import selection as cb_selection
 
 import visdcc
+from src.discord import DiscordLink
 from src.job import jobFromJson
 from src.mj import getJobStatus, getRecentJobsForUser
 from src.node import NodeType, nodeFromJob
-from src.graph import Graph
 from src.nGraph import nGraph
 
 app = Dash(__name__)
@@ -27,14 +28,39 @@ except FileNotFoundError:
 NETOPTS = dict(
     # height='400px',
     # width='60%',
-    nodes={"size": 50},
-    configure={"enabled": False, "filter": ["physics", "layout"]},
-    # layout={'clusterThreshold':10},
+    nodes={"scaling": {"min": 10, "max": 50}, "value":1},
+    configure={"enabled": False},
+    layout={
+        "hierarchical": {
+            "enabled": False,
+            "levelSeparation": 200,
+            "nodeSpacing": 125,
+            "treeSpacing": 300,
+            "sortMethod": "directed",
+        }
+    },
     edges={
         "smooth": {"enabled": False},
         "arrows": {"to": {"enabled": True, "scaleFactor": 1}},
+        "font": {"size": 61, "strokeWidth": 3},
+        "selectionWidth": 8,
+    },
+    manipulation={
+        "enabled": True,
+        "initiallyActive": True,
+        "addNode": {"enabled": True},
+        # "initiallyActive": True,
+        # "addNode": False,
+        # "addEdge": False,
+        # "deleteNode": True,
+        # "deleteEdge": True,
     },
     physics={
+        "hierarchicalRepulsion": {
+            "centralGravity": 0,
+            "sortMethod": "directed",
+            "nodeDistance": 210,
+        },
         "barnesHut": {
             "gravitationalConstant": -46688,
             "centralGravity": 0.95,
@@ -43,130 +69,204 @@ NETOPTS = dict(
             "damping": 0.4,
         },
         "minVelocity": 0.75,
+        "solver": "barnesHut",
         "timestep": 0.3,
+        "minVelocity": 0.75,
     },
 )
 
 app.layout = html.Div(
-    [
+    id="app-container",
+    style={"display": "flex", "flexDirection": "row"},
+    children=[
         html.Div(
-            [
-                html.Div(
-                    id="graphControls"
-                ),  # Style gets set by the graph_controls_button callback
-                html.Div(
-                    visdcc.Network(
-                        id="net",
-                        selection={"nodes": [], "edges": []},
-                        data={"nodes": [], "edges": []},
-                        style={"height": "100%"},
-                        options=NETOPTS,
-                    ),
-                    style={"width": "80%", "height": "400px", "flex": "1"},
-                ),
-            ],
-            id="graph",
+            id="interface-container",
             style={
-                "width": "100%",
-                "height": "400px",
                 "display": "flex",
-                "flexDirection": "row",
-                "justifyContent": "space-between",
+                "flexDirection": "column",
+                "order": 1,
+                "flex-grow": 2,
             },
-        ),
-        dcc.Interval(
-            id="interval-update-graph", interval=30 * 1000, n_intervals=0, disabled=True
-        ),
-        # dcc.Interval(
-        #     id="interval-random-job", interval=120 * 1000, n_intervals=0, disabled=True
-        # ),
-        html.Div(id="random_job_id"),
-        html.Div(id="node_info"),
-        html.Div(id="configure"),
-        html.Div(
-            [
-                html.Button("Graph Controls", id="graph_controls_button", n_clicks=0),
-                dcc.Input(
-                    id="image_selection", min=1, max=4, step=1, value=1, type="range"
-                ),
-                html.Button(
-                    "V<>", id="variance", name="variance_button", value="variation"
-                ),
-                html.Button(
-                    "U<>", id="upsample", name="upscale_button", value="upsample"
-                ),
-                # for 2x2 images...
-                html.Button(
-                    "reroll", id="reroll", name="reroll_button", value="reroll"
-                ),
-                html.Button(
-                    "Make Variations",
-                    id="make_variations",
-                    name="make_variations_button",
-                    value="variation",
-                ),  # TODO:: Only show if the node is an upsampled image
-                # TODO:: Button for "upscale to max" if availabe... Also need to determine how we might know if that's possible or not...
-                html.Div(id="jobStatus"),
-            ],
-            id="jobInputs",
-        ),
-        html.Div(
-            id="midjourneyInputs",
             children=[
-                html.P(
-                    [
-                        "userId",
-                        dcc.Input(
-                            id="userId",
-                            placeholder="Enter a user Id ...",
-                            type="text",
-                            value=MIDJ_USER,
-                        ),  # Add your midjourney userid here
-                        "numberOfJobs:",
-                        dcc.Input(
-                            id="numJobs",
-                            placeholder="Enter a max number of jobs",
-                            type="number",
-                            name="numJobs",
-                            min=1,
-                            debounce=True,
-                            value=1,
-                        ),
-                        "jobsPerQuery:",
-                        dcc.Input(
-                            id="jobsPerQuery",
-                            placeholder="Jobs per query",
-                            type="number",
-                            debounce=True,
-                            min=1,
-                            max=100,
-                            value=10,
-                        ),
-                        "Start Page:",
-                        dcc.Input(
-                            id="page",
-                            placeholder="Enter a page number to start on, 0 is first...",
-                            type="number",
-                            debounce=True,
-                            min=1,
-                            value=1,
-                        ),
-                        html.Button(
-                            "Refresh_Graph",
-                            id="refresh_graph",
-                            name="refresh_graph_button",
-                        ),
-                        html.Button(
-                            "Random_Job", id="random_job", name="randomb_job_button"
+                html.Div(
+                    id="graph-container",
+                    children=[
+                        html.Div(
+                            style={"order": 1, "width": "9vw"}, id="graphControls"
+                        ),  # Style gets set by the graph_controls_button callback
+                        visdcc.Network(
+                            id="net",
+                            selection={"nodes": [], "edges": []},
+                            data={"nodes": [], "edges": []},
+                            style={"height": "100%", "width": "100%", "order": 2},
+                            options=NETOPTS,
                         ),
                     ],
-                    style={"padding-bottom": "30px"},
+                    style={
+                        "display": "flex",
+                        "flexDirection": "row",
+                        "width": "58vw",
+                        "height": "70vh",
+                        "order": 1,
+                    },
+                ),
+                dcc.Interval(
+                    id="interval-update-graph",
+                    interval=30 * 1000,
+                    n_intervals=0,
+                    disabled=True,
+                ),
+                # dcc.Interval(
+                #     id="interval-random-job", interval=120 * 1000, n_intervals=0, disabled=True
+                # ),
+                html.Div(
+                    id="input-container",
+                    style={"order": 1},
+                    children=[
+                        html.Div(id="random_job_id"),
+                        html.Div(id="node_info"),
+                        html.Div(id="configure"),
+                        html.Div(
+                            [
+                                html.Button(
+                                    "Graph Controls",
+                                    id="graph_controls_button",
+                                    n_clicks=0,
+                                ),
+                                html.Button("fast", id="fast", n_clicks=0),
+                                html.Button("relax", id="relax", n_clicks=0),
+                                html.Br(),
+                                dcc.Input(
+                                    type="text", id="prompt", value="", debounce=True
+                                ),
+                                dcc.Input(
+                                    type="text",
+                                    id="modifiers",
+                                    value="--uplight --test --mp",
+                                    debounce=True,
+                                ),
+                                html.Button("imagine", id="imagine", n_clicks=0),
+                                html.Br(),
+                                dcc.Input(
+                                    id="image_selection",
+                                    min=1,
+                                    max=4,
+                                    step=1,
+                                    value=1,
+                                    type="range",
+                                ),
+                                html.Button(
+                                    "V<>",
+                                    id="variance",
+                                    name="variance_button",
+                                    value="variation",
+                                ),
+                                html.Button(
+                                    "U<>",
+                                    id="upsample",
+                                    name="upscale_button",
+                                    value="upsample",
+                                ),
+                                # for 2x2 images...
+                                html.Button(
+                                    "reroll",
+                                    id="reroll",
+                                    name="reroll_button",
+                                    value="reroll",
+                                ),
+                                html.Button(
+                                    "Make Variations",
+                                    id="make_variations",
+                                    name="make_variations_button",
+                                    value="variation",
+                                ),  # TODO:: Only show if the node is an upsampled image
+                                html.Button(
+                                    "Max Upscale",
+                                    id="maxup",
+                                    name="maxup",
+                                    value="maxup",
+                                ),
+                                # TODO:: Button for "upscale to max" if availabe... Also need to determine how we might know if that's possible or not...
+                                html.Div(id="jobStatus"),
+                                html.Div(id="imagineStatus"),
+                            ],
+                            id="jobInputs",
+                        ),
+                        html.Div(
+                            id="midjourneyInputs",
+                            children=[
+                                html.P(
+                                    [
+                                        "userId",
+                                        dcc.Input(
+                                            id="userId",
+                                            placeholder="Enter a user Id ...",
+                                            type="text",
+                                            value=MIDJ_USER,
+                                            style={"width": "135px"},
+                                        ),  # Add your midjourney userid here
+                                        "numberOfJobs:",
+                                        dcc.Input(
+                                            id="numJobs",
+                                            placeholder="Enter a max number of jobs",
+                                            type="number",
+                                            name="numJobs",
+                                            min=1,
+                                            debounce=True,
+                                            value=1,
+                                            style={"width": "40px"},
+                                        ),
+                                        "jobsPerQuery:",
+                                        dcc.Input(
+                                            id="jobsPerQuery",
+                                            placeholder="Jobs per query",
+                                            type="number",
+                                            debounce=True,
+                                            min=1,
+                                            max=100,
+                                            value=10,
+                                            style={"width": "40px"},
+                                        ),
+                                        "Start Page:",
+                                        dcc.Input(
+                                            id="page",
+                                            placeholder="Enter a page number to start on, 0 is first...",
+                                            type="number",
+                                            debounce=True,
+                                            min=1,
+                                            value=1,
+                                            style={"width": "40px"},
+                                        ),
+                                        html.Button(
+                                            "Refresh_Graph",
+                                            id="refresh_graph",
+                                            name="refresh_graph_button",
+                                        ),
+                                        html.Button(
+                                            "Random_Job",
+                                            id="random_job",
+                                            name="randomb_job_button",
+                                        ),
+                                    ],
+                                    style={"padding-bottom": "30px"},
+                                ),
+                            ],
+                        ),
+                        html.Div(id="edges"),
+                    ],
                 ),
             ],
         ),
-        html.Div(id="nodes"),
-        html.Div(id="edges"),
-    ]
+        html.Div(
+            id="nodes",
+            style={
+                "order": 2,
+                "align-items": "center",
+                "display": "flex",
+                "width": "20%",
+            },
+        ),
+    ],
 )
 
 
@@ -184,9 +284,9 @@ def callSelection(selection):
 )
 def callGraphControls(n_clicks):
     if n_clicks % 2 == 0:
-        return {"width": "20%", "overflow": "auto", "display": "none"}
+        return {"width": "8vw", "overflow": "auto", "display": "none"}
     else:
-        return {"width": "20%", "overflow": "auto"}
+        return {"width": "8vw", "overflow": "auto"}
 
 
 @app.callback(Output("net", "run"), [Input("graphControls", "id")])
@@ -216,6 +316,103 @@ def initControls(controls):
 # def callRandomJob(n_intervals, n_clicks):
 #     global graph
 #     return random_job(graph)
+
+lastFast = 0
+lastRelax = 0
+lastImagine = 0
+lastMax = 0
+mode = "fast"
+
+
+@app.callback(
+    Output("maxup", "n_clicks"),
+    [
+        Input("maxup", "n_clicks"),
+    ],
+    State("net", "selection"),
+)
+def runMax(max, selections):
+    global graph, mode
+    if len(selections["nodes"]) == 0:
+        print("No nodes selected")
+        return 0
+    node = graph.nodes[selections["nodes"][0]]
+    if max == 0:
+        return 0
+    DL = DiscordLink()
+    if mode == "relax":
+        print("Going fast first")
+        DL.fast()
+        sleep(0.2)
+        results = DL.max(node["node"])
+        sleep(0.2)
+        DL.relax()
+        print("Back to relaxed!")
+    else:
+        results = DL.max(node["node"])
+
+    return 0
+
+
+@app.callback(
+    Output("fast", "n_clicks"),
+    [
+        Input("fast", "n_clicks"),
+    ],
+)
+def runFast(fast):
+    global lastFast, mode
+    if fast == lastFast:
+        return lastFast
+    lastFast = fast + 1
+    DL = DiscordLink()
+    results = DL.fast()
+    mode = "fast"
+    print(mode)
+    return lastFast
+
+
+lastRelax = 0
+
+
+@app.callback(
+    Output("relax", "n_clicks"),
+    [
+        Input("relax", "n_clicks"),
+    ],
+)
+def runRelax(relax):
+    global lastRelax, mode
+    if relax == lastRelax:
+        return lastRelax
+    lastRelax = relax + 1
+    DL = DiscordLink()
+    results = DL.relax()
+    mode = "relax"
+    print(mode)
+    return lastRelax
+
+
+@app.callback(
+    Output("imagineStatus", "children"),
+    [
+        Input("imagine", "n_clicks"),
+    ],
+    State("prompt", "value"),
+    State("modifiers", "value"),
+)
+def runImagine(imagine, prompt, value):
+    global graph, lastImagine
+    if imagine == lastImagine:
+        return html.Div()
+
+    DL = DiscordLink()
+    results = DL.imagine(prompt + " " + value)
+
+    if results:
+        return html.Div("/imagine prompt:" + prompt + " " + value)
+
+    return html.Div()
 
 
 @app.callback(

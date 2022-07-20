@@ -1,12 +1,12 @@
 from dash import Dash, html, dcc
 import random
 from src.discord import DiscordLink
-from src.graph import Graph
+from src.nGraph import nGraph
 
 from src.mj import getRunningJobsForUser
 
 
-def random_job(graph: Graph,userId:str):
+def random_job(graph: nGraph, userId: str):
     node = graph.getRandomNode()
 
     if node is None:

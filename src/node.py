@@ -47,7 +47,7 @@ class Node:
     def getPromptNode(self):
         return Node(
             id=self.getTruncatedFullCommand(),
-            shape="ellipse",
+            shape="box",
             prompt=self.prompt,
             label=self.getTruncatedFullCommand(),
             full_command=self.full_command,
@@ -105,6 +105,7 @@ class Node:
             "id": self.id,
             "shape": self.shape,
             "image": self.image,
+            "value": 1,
             # "reference_job_id": self.reference_job_id,
             # "reference_image_num": self.reference_image_num,
             "prompt": self.prompt,
