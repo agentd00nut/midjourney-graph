@@ -28,7 +28,13 @@ except FileNotFoundError:
 NETOPTS = dict(
     # height='400px',
     # width='60%',
-    nodes={"scaling": {"min": 10, "max": 50}, "value":1},
+    nodes={
+        "scaling": {"min": 10, "max": 50},
+        "value": 1,
+        "size": 17,
+        "font": {"size": 23},
+        "scaling": {"min": 106, "max": 200},
+    },
     configure={"enabled": False},
     layout={
         "hierarchical": {
@@ -40,16 +46,17 @@ NETOPTS = dict(
         }
     },
     edges={
-        "smooth": {"enabled": False},
         "arrows": {"to": {"enabled": True, "scaleFactor": 1}},
         "font": {"size": 61, "strokeWidth": 3},
         "selectionWidth": 8,
+        "scaling": {"min": 11},
+        "selectionWidth": 8,
+        "selfReferenceSize": 15,
+        "smooth": False,
     },
     manipulation={
         "enabled": True,
-        "initiallyActive": True,
-        "addNode": {"enabled": True},
-        # "initiallyActive": True,
+        "initiallyActive": True  # "initiallyActive": True,
         # "addNode": False,
         # "addEdge": False,
         # "deleteNode": True,
@@ -58,8 +65,9 @@ NETOPTS = dict(
     physics={
         "hierarchicalRepulsion": {
             "centralGravity": 0,
-            "sortMethod": "directed",
-            "nodeDistance": 210,
+            "springLength": 695,
+            "springConstant": 0.02,
+            "nodeDistance": 390,
         },
         "barnesHut": {
             "gravitationalConstant": -46688,
@@ -68,10 +76,10 @@ NETOPTS = dict(
             "springConstant": 0.125,
             "damping": 0.4,
         },
-        "minVelocity": 0.75,
-        "solver": "barnesHut",
+        "maxVelocity": 180,
+        "minVelocity": 0.56,
+        "solver": "hierarchicalRepulsion",
         "timestep": 0.3,
-        "minVelocity": 0.75,
     },
 )
 
@@ -263,7 +271,6 @@ app.layout = html.Div(
                 "order": 2,
                 "align-items": "center",
                 "display": "flex",
-                "width": "20%",
             },
         ),
     ],
