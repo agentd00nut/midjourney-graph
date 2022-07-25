@@ -4,11 +4,10 @@ from dataclasses import dataclass
 @dataclass
 class Job:
     id: str
-    accumulated_duration: int
     image_paths: list[str]
     image: str
     status: str
-    duration: str
+    # duration: str
     enqueue_time: str
     reference_job_id: str
     reference_image_num: int
@@ -36,13 +35,11 @@ def jobFromJson(j):
 
     return Job(
         id=j["id"],
-        accumulated_duration=j["accumulated_duration"],
         image_paths=j["image_paths"],
         image=job_image_root + "grid_0.webp"
         if len(j["image_paths"]) == 4
         else j["image_paths"][0],
         status=j["current_status"],
-        duration=j["accumulated_duration"],
         enqueue_time=j["enqueue_time"],
         reference_job_id=j["reference_job_id"],
         reference_image_num=j["reference_image_num"],
