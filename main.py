@@ -52,6 +52,7 @@ NETOPTS = dict(
         "scaling": {"min": 11},
         "selectionWidth": 8,
         "selfReferenceSize": 15,
+        "value": 1,
         "smooth": False,
     },
     manipulation={
@@ -62,25 +63,25 @@ NETOPTS = dict(
         # "deleteNode": True,
         # "deleteEdge": True,
     },
-    physics={
-        "hierarchicalRepulsion": {
-            "centralGravity": 0,
-            "springLength": 695,
-            "springConstant": 0.02,
-            "nodeDistance": 390,
-        },
-        "barnesHut": {
-            "gravitationalConstant": -46688,
-            "centralGravity": 0.95,
-            "springLength": 120,
-            "springConstant": 0.125,
-            "damping": 0.4,
-        },
-        "maxVelocity": 180,
-        "minVelocity": 0.56,
-        "solver": "hierarchicalRepulsion",
-        "timestep": 0.3,
-    },
+    # physics={
+    #     "hierarchicalRepulsion": {
+    #         "centralGravity": 0,
+    #         "springLength": 695,
+    #         "springConstant": 0.02,
+    #         "nodeDistance": 390,
+    #     },
+    #     "barnesHut": {
+    #         "gravitationalConstant": -46688,
+    #         "centralGravity": 0.95,
+    #         "springLength": 120,
+    #         "springConstant": 0.125,
+    #         "damping": 0.4,
+    #     },
+    #     "maxVelocity": 180,
+    #     "minVelocity": 0.56,
+    #     "solver": "hierarchicalRepulsion",
+    #     "timestep": 0.3,
+    # },
 )
 
 app.layout = html.Div(
@@ -100,7 +101,7 @@ app.layout = html.Div(
                     id="graph-container",
                     children=[
                         html.Div(
-                            style={"order": 1, "width": "9vw"}, id="graphControls"
+                            style={"order": 1, "width": "16vw"}, id="graphControls"
                         ),  # Style gets set by the graph_controls_button callback
                         visdcc.Network(
                             id="net",
@@ -113,7 +114,7 @@ app.layout = html.Div(
                     style={
                         "display": "flex",
                         "flexDirection": "row",
-                        "width": "58vw",
+                        "width": "100wh",
                         "height": "70vh",
                         "order": 1,
                     },
@@ -267,11 +268,7 @@ app.layout = html.Div(
         ),
         html.Div(
             id="nodes",
-            style={
-                "order": 2,
-                "align-items": "center",
-                "display": "flex",
-            },
+            style={"position": "absolute", "align-items": "center", "right": "0px"},
         ),
     ],
 )
@@ -291,9 +288,9 @@ def callSelection(selection):
 )
 def callGraphControls(n_clicks):
     if n_clicks % 2 == 0:
-        return {"width": "8vw", "overflow": "auto", "display": "none"}
+        return {"width": "16vw", "overflow": "auto", "display": "none"}
     else:
-        return {"width": "8vw", "overflow": "auto"}
+        return {"width": "16vw", "overflow": "auto"}
 
 
 @app.callback(Output("net", "run"), [Input("graphControls", "id")])
