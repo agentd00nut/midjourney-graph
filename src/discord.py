@@ -96,7 +96,6 @@ class DiscordLink:
             return None
         payload = {
             "type": 2,
-            "guild_id": 662267976984297473,
             "channel_id": DISCORD_CHANNEL,  # TODO:: Better channel handling for /imagine prompts
             "application_id": "936929561302675456",
             "session_id": DISCORD_SESSION,
@@ -109,7 +108,7 @@ class DiscordLink:
                 "attachments": [],
             },
         }
-
+        print(payload)
         return self.POST(url, payload=payload)
 
     def fast(
