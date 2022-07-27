@@ -32,7 +32,7 @@ def selection(graph: nGraph, selections):
 
     x = []  # clunky way to build x...
     if node["image"]:
-        x.append(html.Img(src=node["image"], style={"max-width": "100%", "max-height": "100%"}))
+        x.append(html.Img(src=node["image"], style={"max-width": "40vw"}))
     x.append(
         html.A(
             html.H4("Goto discord"),
@@ -41,12 +41,7 @@ def selection(graph: nGraph, selections):
     )
     div = html.Div(
         x,
-        style={
-            "display": "flex",
-            "flex-direction": "column",
-            "justify-content": "center",
-            "align-items": "center",
-        },
+        style={"right": 0, "position": "absolute"},
     )
 
     return div
