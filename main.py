@@ -63,6 +63,16 @@ NETOPTS = dict(
         # "deleteNode": True,
         # "deleteEdge": True,
     },
+    physics={
+        "repulsion": {
+            "springLength": 475,
+            "springConstant": 0.01,
+            "nodeDistance": 500,
+            "damping": 0.07,
+        },
+        "minVelocity": 0.75,
+        "solver": "repulsion",
+    }
     # physics={
     #     "hierarchicalRepulsion": {
     #         "centralGravity": 0,

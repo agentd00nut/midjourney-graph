@@ -69,9 +69,9 @@ class Node:
                 id=self.reference_job_id,
                 shape="text",
                 prompt=self.prompt,
-                label=self.reference_job_id,
+                label="temp",
                 full_command=self.full_command,
-                job=self.job,
+                job=None,
                 type=NodeType.reference,
             )
         return None
@@ -127,13 +127,14 @@ class Node:
         """
         if self.id != other.id:
             raise Exception("Nodes must have the same id to be added together!")
+        label = self.label if self.label is not None else other.label
         return Node(
             id=self.id,
             image=self.image or other.image,
             reference_job_id=self.reference_job_id or other.reference_job_id,
             reference_image_num=self.reference_image_num or other.reference_image_num,
             prompt=self.prompt or other.prompt,
-            label=self.label or other.label,
+            label=self.label if self.label is not "temp" else other.label,
             full_command=self.full_command or other.full_command,
             job=self.job or other.job,
             type=self.type or other.type,

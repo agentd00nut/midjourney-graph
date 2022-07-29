@@ -80,7 +80,7 @@ class DiscordLink:
             "session_id": DISCORD_SESSION,
             "data": {"component_type": 2, "custom_id": type},
         }
-        print(payload)
+        print(node.id, payload)
         return self.POST(url, payload=payload)
 
     def imagine(self, prompt: str) -> requests.Response | None:
