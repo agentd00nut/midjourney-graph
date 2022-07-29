@@ -222,7 +222,7 @@ app.layout = html.Div(
                                             placeholder="Enter a user Id ...",
                                             type="text",
                                             value=MIDJ_USER,
-                                            style={"width": "135px"},
+                                            style={"width": "50px"},
                                         ),  # Add your midjourney userid here
                                         "numberOfJobs:",
                                         dcc.Input(
