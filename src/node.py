@@ -109,7 +109,7 @@ class Node:
             # "reference_job_id": self.reference_job_id,
             # "reference_image_num": self.reference_image_num,
             "prompt": self.prompt,
-            "label": self.label,
+            "label": self.label if self.image is None else "",
             "type": str(self.type),
         }
 
@@ -134,7 +134,7 @@ class Node:
             reference_job_id=self.reference_job_id or other.reference_job_id,
             reference_image_num=self.reference_image_num or other.reference_image_num,
             prompt=self.prompt or other.prompt,
-            label=self.label if self.label is not "temp" else other.label,
+            label=self.label if self.label != "temp" else other.label,
             full_command=self.full_command or other.full_command,
             job=self.job or other.job,
             type=self.type or other.type,
