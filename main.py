@@ -11,7 +11,7 @@ from src.job import jobFromJson
 from src.mj import getJobStatus, getRecentJobsForUser
 from src.node import NodeType, nodeFromJob
 from src.nGraph import nGraph
-from src.layout import layout
+from src.layout import MIDJ_USER, layout
 app = Dash(__name__)
 
 
