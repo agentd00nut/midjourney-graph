@@ -7,7 +7,7 @@ from src.mj import getRunningJobsForUser
 
 
 def random_job(graph: nGraph, userId: str):
-    node = graph.getRandomNode()
+    node = graph.random_node()
 
     if node is None:
         return html.Div([html.H4("No nodes in graph")])
@@ -23,7 +23,7 @@ def random_job(graph: nGraph, userId: str):
         print("Too many jobs running to add a random one")
 
     # get a random node from graph.nodes
-    node = graph.getRandomNode()
+    node = graph.random_node()
 
     while (
         node is None
@@ -31,7 +31,7 @@ def random_job(graph: nGraph, userId: str):
         or node.image == ""
         or len(node.job.image_paths) != 4
     ):  # currently disabled for upsamples
-        node = graph.getRandomNode()
+        node = graph.random_node()
 
     if node is None:
         return html.Div([html.H4("No nodes in graph")])

@@ -14,7 +14,7 @@ class nGraph(nx.DiGraph):
         n = self.number_of_nodes()
         if n == 0:
             return None
-        return self.nodes[secrets.randbelow(n)]
+        return self.nodes[secrets.choice(list(self.nodes))]["node"]
 
     def add_mj_node(self, node: Node):
 

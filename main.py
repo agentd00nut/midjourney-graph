@@ -1,10 +1,7 @@
-from dataclasses import asdict
-from pdb import lasti2lineno
 from time import sleep
-from dash import Dash, html, dcc, Input, Output, callback, State
+from dash import Dash, html, dcc, Input, Output, State, dash
 from dash.dependencies import Input, Output
-import networkx as nx
-
+from dash._callback_context import callback_context
 from src.callbacks.randomJob import random_job
 from src.callbacks.runJob import runJob
 from src.callbacks.selection import selection as cb_selection
@@ -70,28 +67,15 @@ NETOPTS = dict(
             "nodeDistance": 500,
             "damping": 0.07,
         },
+        "hierarchicalRepulsion": {
+            "centralGravity": 0,
+            "springLength": 475,
+            "nodeDistance": 500,
+            "damping": 0.09,
+        },
         "minVelocity": 0.75,
         "solver": "repulsion",
-    }
-    # physics={
-    #     "hierarchicalRepulsion": {
-    #         "centralGravity": 0,
-    #         "springLength": 695,
-    #         "springConstant": 0.02,
-    #         "nodeDistance": 390,
-    #     },
-    #     "barnesHut": {
-    #         "gravitationalConstant": -46688,
-    #         "centralGravity": 0.95,
-    #         "springLength": 120,
-    #         "springConstant": 0.125,
-    #         "damping": 0.4,
-    #     },
-    #     "maxVelocity": 180,
-    #     "minVelocity": 0.56,
-    #     "solver": "hierarchicalRepulsion",
-    #     "timestep": 0.3,
-    # },
+    },
 )
 
 app.layout = html.Div(
@@ -133,11 +117,14 @@ app.layout = html.Div(
                     id="interval-update-graph",
                     interval=30 * 1000,
                     n_intervals=0,
-                    disabled=True,
+                    disabled=False,
                 ),
-                # dcc.Interval(
-                #     id="interval-random-job", interval=120 * 1000, n_intervals=0, disabled=True
-                # ),
+                dcc.Interval(
+                    id="interval-random-job",
+                    interval=90 * 1000,
+                    n_intervals=0,
+                    disabled=False,
+                ),
                 html.Div(
                     id="input-container",
                     style={"order": 1},
@@ -161,7 +148,7 @@ app.layout = html.Div(
                                 dcc.Input(
                                     type="text",
                                     id="modifiers",
-                                    value="--uplight --test --mp",
+                                    value="--uplight --q 2 --mp ",
                                     debounce=True,
                                 ),
                                 html.Button("imagine", id="imagine", n_clicks=0),
@@ -243,7 +230,7 @@ app.layout = html.Div(
                                             debounce=True,
                                             min=1,
                                             max=100,
-                                            value=10,
+                                            value=4,
                                             style={"width": "40px"},
                                         ),
                                         "Start Page:",
@@ -266,6 +253,15 @@ app.layout = html.Div(
                                             id="random_job",
                                             name="randomb_job_button",
                                         ),
+                                        html.Button(
+                                            "Run Random Off",
+                                            id="toggle_random",
+                                            value=0,
+                                        ),
+                                        html.Br(),
+                                        html.Button(
+                                            "clear graph", id="clear", n_clicks=0
+                                        ),
                                     ],
                                     style={"padding-bottom": "30px"},
                                 ),
@@ -285,6 +281,16 @@ app.layout = html.Div(
 
 
 graph = nGraph()
+
+
+@app.callback(Output("clear", "n_clicks"), [Input("clear", "n_clicks")])
+def callSelection(selection):
+    global graph
+    graph.clear()
+    print("clearing graph")
+    # TODO:: call the graph to redraw itself...
+
+    return 0
 
 
 @app.callback(Output("nodes", "children"), [Input("net", "selection")])
@@ -324,12 +330,31 @@ def initControls(controls):
     """
 
 
-# @app.callback(
-#     Output('random_job_id', 'children'),
-#     [ Input('interval-random-job', 'n_intervals'), Input('random_job','n_clicks') ])
-# def callRandomJob(n_intervals, n_clicks):
-#     global graph
-#     return random_job(graph)
+run_random_job = 0
+
+
+@app.callback(Output("toggle_random", "children"), [Input("toggle_random", "value")])
+def toggleRandomRun(value):
+    callback_context.triggered[0]["prop_id"]
+    global run_random_job
+    if run_random_job == 0:
+        run_random_job = 1
+        return "Run Random On"
+    else:
+        run_random_job = 0
+        return "Run Random Off"
+
+
+@app.callback(
+    Output("random_job", "n_clicks"),
+    [Input("interval-random-job", "n_intervals"), Input("random_job", "n_clicks")],
+    
+)
+def callRandomJob(n_intervals, n_clicks):
+    global graph
+    print(random_job(graph, MIDJ_USER))
+    return 1
+
 
 lastFast = 0
 lastRelax = 0
@@ -520,6 +545,4 @@ def mainFun(userId, numJobs, page, jobsPerQuery, refresh_graph, intervals):
 
 
 if __name__ == "__main__":
-    app.run_server(
-        debug=True,
-    )
+    app.run_server(debug=True, host="192.168.50.160", port=8050)
