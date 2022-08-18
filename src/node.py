@@ -109,7 +109,7 @@ class Node:
             # "reference_job_id": self.reference_job_id,
             # "reference_image_num": self.reference_image_num,
             "prompt": self.prompt,
-            "label": self.label if self.image is None else "",
+            "label": self.label if self.type == NodeType.prompt else "",
             "type": str(self.type),
         }
 
