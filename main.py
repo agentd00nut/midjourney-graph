@@ -70,16 +70,18 @@ def initControls(controls):
 run_random_job = 0
 
 
-# @app.callback(Output("toggle_random", "children"), [Input("toggle_random", "value")])
-# def toggleRandomRun(value):
-#     callback_context.triggered[0]["prop_id"]
-#     global run_random_job
-#     if run_random_job == 0:
-#         run_random_job = 1
-#         return "Run Random On"
-#     else:
-#         run_random_job = 0
-#         return "Run Random Off"
+@app.callback(Output("toggle_random", "value"), [Input("toggle_random", "value")])
+def toggleRandomRun(value):
+    callback_context.triggered[0]["prop_id"]
+    global run_random_job
+    if run_random_job == 0:
+        run_random_job = 1
+        print("RANDOM IS NOW ON")
+        return "RunRandomOn"
+    else:
+        print("RANDOM IS NOW OFF")
+        run_random_job = 0
+        return "RunRandomOff"
 
 
 @app.callback(
@@ -88,6 +90,12 @@ run_random_job = 0
 )
 def callRandomJob(n_intervals, n_clicks):
     global graph
+    global run_random_job
+    if run_random_job == 0:
+        print(
+            "not running random job, run random is off... though i understand how thats annoying lol"
+        )
+        return 1
     print(random_job(graph, MIDJ_USER))
     return 1
 

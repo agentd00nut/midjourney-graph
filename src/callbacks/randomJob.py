@@ -6,14 +6,10 @@ from src.nGraph import nGraph
 
 from src.mj import getRunningJobsForUser
 from src.node import NodeType
+from src.node import Node
 
 
-def random_job(graph: nGraph, userId: str):
-    node = graph.random_node()
-    DL = DiscordLink()
-
-    if node is None:
-        return html.Div([html.H4("No nodes in graph")])
+def getJobs(userId: str):
 
     jobs = getRunningJobsForUser(userId, 20)
     if not jobs:
@@ -24,20 +20,31 @@ def random_job(graph: nGraph, userId: str):
     print("Got recent this many recent jobs: ", len(jobs))
     if len(jobs) >= 7:  # lazy way to deal with delays in the api
         print("Too many jobs running to add a random one")
+        return None
 
-    # get a random node from graph.nodes
+    return jobs
+
+
+def random_job(graph: nGraph, userId: str):
+    DL = DiscordLink()
+
+    jobs = getJobs(userId)
+    if jobs is None:
+        return html.Div([html.H4("Too many running jobs")])
+
     node = graph.random_node()
-
-    while node is None or not (
-        node.type == NodeType.prompt  # or node.type == NodeType.variation
-    ):
-        node = graph.random_node()
-
     if node is None:
         return html.Div([html.H4("No nodes in graph")])
 
+    n_node = node  # This.... this is a bit obtuse.
+    node = node.node
+
     if node.type == NodeType.prompt:
-        print("Got random prompt node:", node.id)
+        print(
+            "Got random prompt node:",
+            node.id,
+            " With ", n_node.
+        )
         print("Running prompt as random job: " + node.id)
         print(DL.imagine(node.id, node))
         return html.Div([html.H4("Running prompt as random job: " + node.prompt)])

@@ -272,11 +272,13 @@ layout = html.Div(
                                             "Random_Job",
                                             id="random_job",
                                             name="randomb_job_button",
+                                            n_clicks=0,
                                         ),
                                         html.Button(
                                             "RunRandomOff",
                                             id="toggle_random",
                                             value="1",
+                                            n_clicks=0,
                                         ),
                                         html.Br(),
                                         html.Button(

@@ -52,8 +52,8 @@ class Node:
             prompt=self.prompt,
             label=self.getTruncatedFullCommand(),
             full_command=self.full_command,
-            job=None,
-            user_id=self.user_id,  # TODO:: Ah; i should just use __getattr__ to fetch these from the job object
+            job=self.job,  # TODO:: prompt nodes shouldn't really have a job but it's easier to just add it here for now
+            user_id=self.user_id,  # TODO:: Ah; i should just use __getattr__ to fetch these from the job object if not already set.
             type=NodeType.prompt,
         )
 

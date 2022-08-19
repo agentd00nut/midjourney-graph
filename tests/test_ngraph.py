@@ -2,10 +2,8 @@ from dataclasses import asdict, astuple
 import pytest
 
 from src.nGraph import nGraph
-from src.node import Node
+from src.node import Node, NodeType
 from src.edge import Edge
-
-
 
 
 class TestnGraph:
@@ -13,64 +11,75 @@ class TestnGraph:
         ng = nGraph()
         assert ng is not None
 
+    def test_randomNode_type(self):
+        ng = nGraph()
+        ng.add_node(Node("p1", type=NodeType.prompt))
+        ng.add_node(Node("v1", type=NodeType.variation, reference_job_id="r1"))
+        ng.add_node(Node("r1", type=NodeType.reference))
+
+        n = ng.random_node(type=NodeType.prompt)
+        assert n.id == "p1"
+
     def test_add_node(self):
         ng = nGraph()
-        ng.add_node(Node('test'))
+        ng.add_node(Node("test"))
         assert ng.number_of_nodes() == 1
-
 
     def test_add_edge(self):
         ng = nGraph()
-        A = Node('A');
-        B = Node('B');
-        ng.add_edge(A,B)
+        A = Node("A")
+        B = Node("B")
+        ng.add_edge(A, B)
         assert ng.number_of_nodes() == 2
         assert ng.number_of_edges() == 1
 
     def test_add_same_node_id_more_data(self):
         ng = nGraph()
-        A = Node('A','');
-        
-        
-        ng.add_node(A.id, n=A);
+        A = Node("A", "")
+
+        ng.add_node(A.id, n=A)
         assert ng.number_of_nodes() == 1
 
-        B=Node('A','some_image_string');
-        ng.add_node(B.id, n=B);
-        assert ng.number_of_nodes() == 1, "Expected to have only one node, containing the data from node B"
+        B = Node("A", "some_image_string")
+        ng.add_node(B.id, n=B)
+        assert (
+            ng.number_of_nodes() == 1
+        ), "Expected to have only one node, containing the data from node B"
 
     def test_update_node_data(self):
         ng = nGraph()
-        A = Node('A','');
-        ng.add_node(A.id, n=A);
+        A = Node("A", "")
+        ng.add_node(A.id, n=A)
         assert ng.number_of_nodes() == 1
 
-        B=Node('A','some_image_string');
-        ng.add_node(B.id, n=B);
-        assert ng.number_of_nodes() == 1, "Expected to have only one node, containing the data from node B"
+        B = Node("A", "some_image_string")
+        ng.add_node(B.id, n=B)
+        assert (
+            ng.number_of_nodes() == 1
+        ), "Expected to have only one node, containing the data from node B"
 
-        ng.nodes.get(B.id)['n'].image = 'updated_string'
-        assert ng.nodes.get(B.id)['n'].image == 'updated_string'
+        ng.nodes.get(B.id)["n"].image = "updated_string"
+        assert ng.nodes.get(B.id)["n"].image == "updated_string"
 
     def test_expanding_dictionary_for_node_attributes(self):
         ng = nGraph()
-        nodeData={'test':1}
-        ng.add_node(0,n=nodeData)
-        assert ng.nodes.get(0)['n']['test'] == 1
-        
-        nodeData['test2']=2
-        ng.add_node(1,**nodeData)
-        assert ng.nodes.get(1)['test2'] == 2
+        nodeData = {"test": 1}
+        ng.add_node(0, n=nodeData)
+        assert ng.nodes.get(0)["n"]["test"] == 1
+
+        nodeData["test2"] = 2
+        ng.add_node(1, **nodeData)
+        assert ng.nodes.get(1)["test2"] == 2
 
     def test_add_mj_Node(self):
         ng = nGraph()
-        A = Node('A','img');
+        A = Node("A", "img")
         ng.add_mj_node(A)
-        assert ng.nodes.get(A.id)['image'] == 'img'
+        assert ng.nodes.get(A.id)["image"] == "img"
 
     def test_node_in_graph(self):
         ng = nGraph()
-        A = Node('A','img');
+        A = Node("A", "img")
         ng.add_mj_node(A)
 
         assert A.id in ng
@@ -78,67 +87,66 @@ class TestnGraph:
 
     def test_add_duplicate_node_with_less_data(self):
         ng = nGraph()
-        A = Node('A','img');
+        A = Node("A", "img")
         ng.add_mj_node(A)
 
         assert A.id in ng
-        assert ng.nodes.get(A.id)['image'] == 'img'
-        B = Node('A',None);
+        assert ng.nodes.get(A.id)["image"] == "img"
+        B = Node("A", None)
         ng.add_mj_node(B)
 
         assert A.id in ng
         assert B.id in ng
         assert ng.number_of_nodes() == 1
-        assert ng.nodes.get(A.id)['image'] == 'img'
-        
+        assert ng.nodes.get(A.id)["image"] == "img"
 
     def test_add_node_with_reference_node(self):
         ng = nGraph()
-        A = Node('A','img');
+        A = Node("A", "img")
         ng.add_mj_node(A)
-        B = Node('B','img',reference_job_id=A.id)
+        B = Node("B", "img", reference_job_id=A.id)
         ng.add_mj_node(B)
         assert ng.number_of_nodes() == 2
         assert ng.number_of_edges() == 1
-        assert ng.nodes.get(B.id)['reference_job_id'] == A.id
+        assert ng.nodes.get(B.id)["reference_job_id"] == A.id
 
     def test_add_node_with_reference_node_then_fuller_reference_node(self):
         ng = nGraph()
 
         # "A" is the reference node that we don't yet have!
-        A = Node('A','img');
+        A = Node("A", "img")
 
         # Adding B with only a reference_job_id
-        B = Node('B','img',reference_job_id=A.id)
+        B = Node("B", "img", reference_job_id=A.id)
         ng.add_mj_node(B)
 
         assert ng.number_of_nodes() == 2
         assert ng.number_of_edges() == 1
-        assert ng.nodes.get(B.id)['reference_job_id'] == A.id
-        assert ng.nodes.get(A.id)['image'] == None # this is the case where the reference node has only been added from the id found in B
+        assert ng.nodes.get(B.id)["reference_job_id"] == A.id
+        assert (
+            ng.nodes.get(A.id)["image"] == None
+        )  # this is the case where the reference node has only been added from the id found in B
 
         # Now add A with the full data, and check that we didn't add a new node, and that the node at that reference id has been updated
         ng.add_mj_node(A)
         assert ng.number_of_nodes() == 2
         assert ng.number_of_edges() == 1
-        assert ng.nodes.get(A.id)['image'] == 'img'
-
+        assert ng.nodes.get(A.id)["image"] == "img"
 
     def test_multiple_nodes_with_shared_reference(self):
         ng = nGraph()
-        A = Node('A','img');
-        B = Node('B','img',reference_job_id=A.id)
+        A = Node("A", "img")
+        B = Node("B", "img", reference_job_id=A.id)
         ng.add_mj_node(B)
-        C = Node('C','img',reference_job_id=A.id)
+        C = Node("C", "img", reference_job_id=A.id)
         ng.add_mj_node(C)
         assert ng.number_of_nodes() == 3
         assert ng.number_of_edges() == 2
-        assert ng.nodes.get(A.id)['image'] == None
-        assert ng.nodes.get(B.id)['image'] == 'img'
-        assert ng.nodes.get(C.id)['image'] == 'img'
+        assert ng.nodes.get(A.id)["image"] == None
+        assert ng.nodes.get(B.id)["image"] == "img"
+        assert ng.nodes.get(C.id)["image"] == "img"
 
         ng.add_mj_node(A)
         assert ng.number_of_nodes() == 3
         assert ng.number_of_edges() == 2
-        assert ng.nodes.get(A.id)['image'] == 'img'
-        
+        assert ng.nodes.get(A.id)["image"] == "img"
