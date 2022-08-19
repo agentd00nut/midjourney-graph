@@ -13,7 +13,7 @@ def getJobs(userId: str):
 
     jobs = getRunningJobsForUser(userId, 20)
     if not jobs:
-        return html.Div([html.H4("failed to get running jobs")])
+        return None
 
     jobs = jobs.json()
 
@@ -27,25 +27,21 @@ def getJobs(userId: str):
 
 def random_job(graph: nGraph, userId: str):
     DL = DiscordLink()
+    print("random_job")
 
     jobs = getJobs(userId)
     if jobs is None:
+        print(" Jobs was none!")
         return html.Div([html.H4("Too many running jobs")])
 
-    node = graph.random_node()
+    node = graph.random_node(NodeType.prompt)
     if node is None:
+        print("the randome Node was none!")
         return html.Div([html.H4("No nodes in graph")])
-
-    n_node = node  # This.... this is a bit obtuse.
-    node = node.node
-
+    print("random job got this random node:", node)
     if node.type == NodeType.prompt:
-        print(
-            "Got random prompt node:",
-            node.id,
-            " With ", n_node.
-        )
-        print("Running prompt as random job: " + node.id)
+
+        print("Running prompt node as random job: " + node.id)
         print(DL.imagine(node.id, node))
         return html.Div([html.H4("Running prompt as random job: " + node.prompt)])
 

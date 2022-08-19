@@ -11,14 +11,21 @@ class nGraph(nx.DiGraph):
         super().__init__(self)
 
     def random_node(self, type: NodeType | None = None):
+
         n = self.number_of_nodes()
         if n == 0:
             print("Cant get random node, no node in graph")
             return None
 
         if type:
-            nodes = [n for n in self if n.type == type]
-            return secrets.choice(nodes)
+            nodes = [n for n in self.nodes(data="type") if n[1] == type]
+            # print(nodes)
+            # print(f"Found {len(nodes)} of type {type}")
+            randNode = secrets.choice(nodes)
+            # print("RANDOM NODE", randNode)
+            node = self.nodes[randNode[0]]
+            # print(node)
+            return node["node"]
 
         node = self.nodes[secrets.choice(list(self.nodes))]
         print("Picked random node", node)
