@@ -30,6 +30,7 @@ class Node:
     shape: str = "image"
     job: Job = None
     type: NodeType = field(default_factory=lambda: NodeType.variation)
+    user_id: str | None = field(default_factory=lambda: None)
 
     def __post_init__(self):
         self.node = (
@@ -52,6 +53,7 @@ class Node:
             label=self.getTruncatedFullCommand(),
             full_command=self.full_command,
             job=None,
+            user_id=self.user_id,  # TODO:: Ah; i should just use __getattr__ to fetch these from the job object
             type=NodeType.prompt,
         )
 
@@ -157,4 +159,5 @@ def nodeFromJob(job: Job):
         shape="image",
         job=job,
         type=nodeType,
+        user_id=job.user_id,
     )

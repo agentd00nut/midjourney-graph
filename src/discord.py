@@ -1,4 +1,5 @@
 import requests
+from src.layout import MIDJ_USER
 from src.node import Node
 
 DISCORD_COOKIE = None
@@ -83,22 +84,47 @@ class DiscordLink:
         print(node.id, payload)
         return self.POST(url, payload=payload)
 
-    def imagine(self, prompt: str, channel:str = DISCORD_CHANNEL,) -> requests.Response | None:
+    def imagine(
+        self,
+        prompt: str,
+        node: Node = None,
+    ) -> requests.Response | None:
         """
         Send an "Imagine" job to discord
 
         Need a better way to handle the channel at some point.
         """
         url = "https://discord.com/api/v9/interactions"
-
+        print("imagine:", prompt, DISCORD_SESSION)
         if DISCORD_SESSION is None:
             print("Error: discord.sessionId not found... dont try to run a job")
             return None
+        print(node)
+        print(node.job)
+        channelId = DISCORD_CHANNEL
+        if node is not None and node.job.user_id == MIDJ_USER:
+            print("checking for thread id")
+            channelId = node.job.platform_channel_id
+            if node.job.platform_thread_id is not None:
+                channelId = node.job.platform_thread_id
+                print("using thread id", channelId)
+        print("channelId", channelId)
+        # Uses default channel if we dont own node, else thread, else channel
+        # c = (
+        #     DISCORD_CHANNEL
+        #     if node.user_id != MIDJ_USER
+        #     else (
+        #         node.platform_thread_id
+        #         if node.platform_thread_id is not None
+        #         else node.platform_channel_id
+        #     )
+        # )
         payload = {
             "type": 2,
-            "channel_id": DISCORD_CHANNEL,  # TODO:: Better channel handling for /imagine prompts
+            "channel_id": channelId,  # TODO:: Better channel handling for /imagine prompts
             "application_id": "936929561302675456",
             "session_id": DISCORD_SESSION,
+            "guild_id": "662267976984297473" if node is None else node.job.guild_id,
             "data": {
                 "version": "994261739745050686",
                 "id": "938956540159881230",

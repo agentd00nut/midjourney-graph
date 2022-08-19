@@ -39,7 +39,7 @@ def random_job(graph: nGraph, userId: str):
     if node.type == NodeType.prompt:
         print("Got random prompt node:", node.id)
         print("Running prompt as random job: " + node.id)
-        print(DL.imagine(node.id))
+        print(DL.imagine(node.id, node))
         return html.Div([html.H4("Running prompt as random job: " + node.prompt)])
 
     print("Got random node: " + str(node))

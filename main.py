@@ -12,9 +12,8 @@ from src.mj import getJobStatus, getRecentJobsForUser
 from src.node import NodeType, nodeFromJob
 from src.nGraph import nGraph
 from src.layout import MIDJ_USER, layout
+
 app = Dash(__name__)
-
-
 
 
 app.layout = layout
@@ -71,22 +70,21 @@ def initControls(controls):
 run_random_job = 0
 
 
-@app.callback(Output("toggle_random", "children"), [Input("toggle_random", "value")])
-def toggleRandomRun(value):
-    callback_context.triggered[0]["prop_id"]
-    global run_random_job
-    if run_random_job == 0:
-        run_random_job = 1
-        return "Run Random On"
-    else:
-        run_random_job = 0
-        return "Run Random Off"
+# @app.callback(Output("toggle_random", "children"), [Input("toggle_random", "value")])
+# def toggleRandomRun(value):
+#     callback_context.triggered[0]["prop_id"]
+#     global run_random_job
+#     if run_random_job == 0:
+#         run_random_job = 1
+#         return "Run Random On"
+#     else:
+#         run_random_job = 0
+#         return "Run Random Off"
 
 
 @app.callback(
     Output("random_job", "n_clicks"),
     [Input("interval-random-job", "n_intervals"), Input("random_job", "n_clicks")],
-    
 )
 def callRandomJob(n_intervals, n_clicks):
     global graph

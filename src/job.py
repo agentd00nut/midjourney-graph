@@ -20,11 +20,8 @@ class Job:
     platform_message_id: str
     platform_thread_id: str
     guild_id: str
-    platform_channel: str
-    platform_channel_id: str
-    platform_message_id: str
-    platform_thread_id: str
     jobType: str
+    user_id: str
 
 
 def jobFromJson(j):
@@ -59,4 +56,5 @@ def jobFromJson(j):
         platform_message_id=j["platform_message_id"],
         platform_thread_id=j["platform_thread_id"],
         jobType=j["type"],
+        user_id=j["user_id"],
     )
