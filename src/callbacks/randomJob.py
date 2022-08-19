@@ -1,13 +1,16 @@
+import secrets
 from dash import Dash, html, dcc
 import random
 from src.discord import DiscordLink
 from src.nGraph import nGraph
 
 from src.mj import getRunningJobsForUser
+from src.node import NodeType
 
 
 def random_job(graph: nGraph, userId: str):
     node = graph.random_node()
+    DL = DiscordLink()
 
     if node is None:
         return html.Div([html.H4("No nodes in graph")])
@@ -25,16 +28,20 @@ def random_job(graph: nGraph, userId: str):
     # get a random node from graph.nodes
     node = graph.random_node()
 
-    while (
-        node is None
-        or node.image is None
-        or node.image == ""
-        or len(node.job.image_paths) != 4
-    ):  # currently disabled for upsamples
+    while node is None or not (
+        node.type == NodeType.prompt  # or node.type == NodeType.variation
+    ):
         node = graph.random_node()
 
     if node is None:
         return html.Div([html.H4("No nodes in graph")])
+
+    if node.type == NodeType.prompt:
+        print("Got random prompt node:", node.id)
+        print("Running prompt as random job: " + node.id)
+        print(DL.imagine(node.id))
+        return html.Div([html.H4("Running prompt as random job: " + node.prompt)])
+
     print("Got random node: " + str(node))
 
     if len(node.job.image_paths) == 1:  #  upsample
@@ -43,14 +50,13 @@ def random_job(graph: nGraph, userId: str):
     elif len(node.job.image_paths) == 4:  # variation
         jobTypes = ["MJ::JOB::variation::", "MJ::JOB::upsample::"]
         # randomly select a job type from the jobTypes list
-        jobType = random.choice(jobTypes)
-        jobNumber = random.choice([1, 2, 3, 4])
+        jobType = secrets.choice(jobTypes)
+        jobNumber = secrets.choice([1, 2, 3, 4])
         jobType = jobType + str(jobNumber)
     elif node.reference_job_id is not None:  # root node
         jobType = "MJ::JOB::reroll::0::SOLO"
         jobNumber = 0
 
-    DL = DiscordLink()
     print(
         "Running the random job of type: "
         + str(jobType)

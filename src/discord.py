@@ -83,7 +83,7 @@ class DiscordLink:
         print(node.id, payload)
         return self.POST(url, payload=payload)
 
-    def imagine(self, prompt: str) -> requests.Response | None:
+    def imagine(self, prompt: str, channel:str = DISCORD_CHANNEL,) -> requests.Response | None:
         """
         Send an "Imagine" job to discord
 

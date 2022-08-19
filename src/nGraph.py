@@ -10,7 +10,7 @@ class nGraph(nx.DiGraph):
     def __init__(self) -> None:
         super().__init__(self)
 
-    def random_node(self):
+    def random_node(self) -> Node | None:
         n = self.number_of_nodes()
         if n == 0:
             return None
