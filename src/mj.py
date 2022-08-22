@@ -90,8 +90,8 @@ def getRecentJobsForUser(userId, page, jobs_per_page, max_jobs):
 
 def getRunningJobsForUser(userId, num_jobs):
     """
-    They updated the api; it reports new recent jobs almost as soon as they show up!
-
+    I lied, they did not, its still minutes or more out of date from what the bot is doing.
+    (atleast for running jobs)
     Gets running jobs for the user.
     """
 

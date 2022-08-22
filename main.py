@@ -289,4 +289,6 @@ def mainFun(userId, numJobs, page, jobsPerQuery, refresh_graph, intervals):
 
 
 if __name__ == "__main__":
-    app.run_server(debug=False, host="192.168.50.160", port=8050)
+    app.run_server(
+        debug=True, dev_tools_hot_reload=True, host="192.168.50.160", port=8050
+    )
