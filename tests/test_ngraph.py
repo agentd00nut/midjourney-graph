@@ -1,12 +1,66 @@
 from dataclasses import asdict, astuple
+import secrets
 import pytest
 
 from src.nGraph import nGraph
 from src.node import Node, NodeType
 from src.edge import Edge
+import random
+
+
+def findNodeWithLowSuccessors(graph: nGraph, node: str, maxSuccessors=3):
+    """
+    Finds a node in the graph "below" or at the given starting node that has less than maxSuccessors.
+
+    Each node that has > maxSuccessors will recursively call this function on all its children.
+
+    The current implementation will be very expensive on large graphs as there is no way (i know of) to "abort" the rest
+    of the list comprehension thats being used... perhaps a loop would make more sense..
+
+    For now it 100% does not matter :)
+
+    A better implementation would be
+    """
+
+    successors = list(graph.successors(node))
+    if len(successors) < maxSuccessors:
+        return node
+
+    matches = [
+        c
+        for c in [
+            findNodeWithLowSuccessors(graph, n, maxSuccessors) for n in successors
+        ]
+        if c is not None
+    ]
+    print(node, matches)
+    if len(matches) > 0:
+        return secrets.choice(matches)
+
+    return None
 
 
 class TestnGraph:
+    def test_recursion(self):
+        print("")
+        ng = nGraph()
+
+        ng.add_node("0")
+        ng.add_edge("0", "A")
+        ng.add_edge("0", "B")
+        ng.add_edge("A", "1A")
+        ng.add_edge("A", "2A")
+        ng.add_edge("1A", "12A")
+        ng.add_edge("1A", "22A")
+        ng.add_edge("2A", "122A")
+        ng.add_edge("B", "BB")
+        ng.add_edge("B", "BBB")
+
+        ng.add_edge("12A", "lolA")
+        # print("A node that matched", findNodeWithLowSuccessors(ng, "0", 1))
+        list_of_dangl = [node for node in ng.nodes if ng.out_degree(node) < 1]
+        print(list_of_dangl)
+
     def test_instantiation(self):
         ng = nGraph()
         assert ng is not None

@@ -19,21 +19,18 @@ class nGraph(nx.DiGraph):
 
         if type:
             nodes = [n for n in self.nodes(data="type") if n[1] == type]
-            # print(nodes)
-            # print(f"Found {len(nodes)} of type {type}")
+            print(f"random_node: Found {len(nodes)} for type {type} choosing one")
             randNode = secrets.choice(nodes)
-            # print("RANDOM NODE", randNode)
             node = self.nodes[randNode[0]]
-            # print(node)
             return node["node"]
 
         node = self.nodes[secrets.choice(list(self.nodes))]
-        print("Picked random node", node)
-        if type is not None:
-            while node.node.type != type:
-                node: Node = self.nodes[secrets.choice(list(self.nodes))][
-                    "node"
-                ]  # TODO:: Ask graph for  all the prompt nodes directly... this is silly.
+        # print("Picked random node", node)
+        # if type is not None:
+        #     while node.node.type != type:
+        #         node: Node = self.nodes[secrets.choice(list(self.nodes))][
+        #             "node"
+        #         ]  # TODO:: Ask graph for  all the prompt nodes directly... this is silly.
 
         return node
 

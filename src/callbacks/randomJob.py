@@ -25,7 +25,11 @@ def getJobs(userId: str):
     return jobs
 
 
-def random_job(graph: nGraph, userId: str):
+# [node for node in ng.nodes if ng.out_degree(node) < 1]
+import networkx as nx
+
+
+def random_job(graph: nGraph, userId: str, type: NodeType = None):
     DL = DiscordLink()
     print("random_job")
 
@@ -34,24 +38,46 @@ def random_job(graph: nGraph, userId: str):
         print(" Jobs was none!")
         return html.Div([html.H4("Too many running jobs")])
 
-    node = graph.random_node(NodeType.prompt)
+    node = graph.random_node(type)
     if node is None:
         print("the randome Node was none!")
         return html.Div([html.H4("No nodes in graph")])
-    print("random job got this random node:", node)
-    if node.type == NodeType.prompt:
 
-        print("Running prompt node as random job: " + node.id)
-        print(DL.imagine(node.id, node))
-        return html.Div([html.H4("Running prompt as random job: " + node.prompt)])
+    # If a prompt node already has enough children, switch to run a job on one of its children.
+    if node.type == type and type == NodeType.prompt:
+        maxChildren = 2
+        if graph.out_degree(node.id) < maxChildren:
+            print(DL.imagine(node.id, node))
+            return html.Div([html.H4("Running prompt as random job: " + node.prompt)])
 
-    print("Got random node: " + str(node))
+        # Get a different random prompt node.
+        promptNodes = [
+            n
+            for n in graph.nodes.data("type")
+            if n[1] == NodeType.prompt
+            and n[0] != node.id
+            and len(list(graph.successors(n[0]))) < maxChildren
+        ]
+        if len(promptNodes) == 0:
+            print(
+                "THERE ARE NO PROMPT NODES WITH FEWER THAN ", maxChildren, " CHILDREN"
+            )
+            print("Picking a node with no descendents for a variation job.")
+            nodeId = secrets.choice(
+                [n for n in list(graph.nodes) if graph.out_degree(n) == 0]
+            )
+            node = graph.nodes[nodeId]["node"]
+        # Get a random node from descendents of prompt node that was picked.
+        # node = secrets.choice(
+        #     [n for n in list(nx.descendants(graph, node.id)) if graph.out_degree(n) < 3]
+        # )
+        # node = graph.nodes[node]["node"]
 
     if len(node.job.image_paths) == 1:  #  upsample
         jobType = "MJ::JOB::variation::1::SOLO"
         jobNumber = 1
     elif len(node.job.image_paths) == 4:  # variation
-        jobTypes = ["MJ::JOB::variation::", "MJ::JOB::upsample::"]
+        jobTypes = ["MJ::JOB::variation::"]  # , "MJ::JOB::upsample::"]
         # randomly select a job type from the jobTypes list
         jobType = secrets.choice(jobTypes)
         jobNumber = secrets.choice([1, 2, 3, 4])

@@ -15,7 +15,6 @@ from src.layout import MIDJ_USER, layout
 
 app = Dash(__name__)
 
-
 app.layout = layout
 graph = nGraph()
 
@@ -70,18 +69,19 @@ def initControls(controls):
 run_random_job = 0
 
 
-@app.callback(Output("toggle_random", "value"), [Input("toggle_random", "value")])
+@app.callback(Output("toggle_random", "n_clicks"), [Input("toggle_random", "n_clicks")])
 def toggleRandomRun(value):
     callback_context.triggered[0]["prop_id"]
     global run_random_job
+    print("WOW")
     if run_random_job == 0:
         run_random_job = 1
         print("RANDOM IS NOW ON")
-        return "RunRandomOn"
+        return 0
     else:
         print("RANDOM IS NOW OFF")
         run_random_job = 0
-        return "RunRandomOff"
+        return 0
 
 
 @app.callback(
@@ -96,7 +96,7 @@ def callRandomJob(n_intervals, n_clicks):
             "not running random job, run random is off... though i understand how thats annoying lol"
         )
         return 1
-    print(random_job(graph, MIDJ_USER))
+    print(random_job(graph, MIDJ_USER, NodeType.prompt))
     return 1
 
 
@@ -289,4 +289,4 @@ def mainFun(userId, numJobs, page, jobsPerQuery, refresh_graph, intervals):
 
 
 if __name__ == "__main__":
-    app.run_server(debug=True, host="192.168.50.160", port=8050)
+    app.run_server(debug=False, host="192.168.50.160", port=8050)

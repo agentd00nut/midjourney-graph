@@ -100,7 +100,12 @@ NETOPTS = NETOPTS_2
 
 layout = html.Div(
     id="app-container",
-    style={"display": "flex", "flexDirection": "row"},
+    style={
+        "display": "flex",
+        "flexDirection": "row",
+        "background": "#121212",
+        "color": "#FFFFFF",
+    },
     children=[
         html.Div(
             id="interface-container",
@@ -275,7 +280,7 @@ layout = html.Div(
                                             n_clicks=0,
                                         ),
                                         html.Button(
-                                            "RunRandomOff",
+                                            "toggle_random",
                                             id="toggle_random",
                                             value="1",
                                             n_clicks=0,
