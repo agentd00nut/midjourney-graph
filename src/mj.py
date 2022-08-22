@@ -82,7 +82,7 @@ def getRecentJobsForUser(userId, page, jobs_per_page, max_jobs):
             continue
 
         recent_jobs.extend(result.json())
-        print(len(recent_jobs), page)
+        # print(len(recent_jobs), page)
         page += 1
 
     return recent_jobs
@@ -90,14 +90,9 @@ def getRecentJobsForUser(userId, page, jobs_per_page, max_jobs):
 
 def getRunningJobsForUser(userId, num_jobs):
     """
-    Unfortunately the api seems to only update once a minute, so we can't really use this to get the latest jobs... though we could loop on it in the background every 30 seconds to
-    do the auto updating.
+    They updated the api; it reports new recent jobs almost as soon as they show up!
 
-    In theory we could spoof websocket connection to pretend we're a connected client and then issue the interaction request for doing `/info` and then parse the response amidst the noise
-    on the socket.... maybe later.
-
-    Returns a list of running jobs for a user... it's not clear what the delay between the bot taking a job and the api say it's running is...
-    It's not clear if a "queued" job is "running" or "queued";
+    Gets running jobs for the user.
     """
 
     # print("Sleeping for 2 seconds");
@@ -116,7 +111,7 @@ def getRunningJobsForUser(userId, num_jobs):
         "jobStatus": "running",
         "userId": userId,
         "dedupe": "true",
-        "timeRangeMinutes": "60",
+        "timeRangeMinutes": "5",
     }
 
     return mj_GET(url, querystring)

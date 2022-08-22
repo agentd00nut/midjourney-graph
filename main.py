@@ -252,7 +252,7 @@ def mainFun(userId, numJobs, page, jobsPerQuery, refresh_graph, intervals):
     recent_jobs = getRecentJobsForUser(userId, page, jobsPerQuery, maxJobs)
 
     nodes = [n for n in [nodeFromJob(jobFromJson(j)) for j in recent_jobs]]
-    print("Got", len(nodes), "new nodes from", len(recent_jobs), "recent jobs")
+    # print("Got", len(nodes), "new nodes from", len(recent_jobs), "recent jobs")
 
     if len(nodes) == 0:
         data = graph.getVisDCCData()
@@ -271,9 +271,9 @@ def mainFun(userId, numJobs, page, jobsPerQuery, refresh_graph, intervals):
             for n in graph.nodes(data=True)
             if n[1]["type"] == NodeType.reference and not n[1]["image"]
         ]
-        print(f"Fetching {len(ref_nodes)} reference nodes")
         if len(ref_nodes) <= 0:
             break
+        print(f"Fetching {len(ref_nodes)} reference nodes")
 
         ref_nodes_to_add = [
             nodeFromJob(jobFromJson(j))

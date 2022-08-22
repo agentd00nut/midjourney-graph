@@ -18,7 +18,7 @@ def getJobs(userId: str):
     jobs = jobs.json()
 
     print("Got recent this many recent jobs: ", len(jobs))
-    if len(jobs) >= 7:  # lazy way to deal with delays in the api
+    if len(jobs) >= 10:  # lazy way to deal with delays in the api
         print("Too many jobs running to add a random one")
         return None
 

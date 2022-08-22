@@ -146,7 +146,7 @@ layout = html.Div(
                 ),
                 dcc.Interval(
                     id="interval-random-job",
-                    interval=90 * 1000,
+                    interval=20 * 1000,  # 90 is nice and safe.
                     n_intervals=0,
                     disabled=False,
                 ),
