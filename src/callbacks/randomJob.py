@@ -1,7 +1,8 @@
 import secrets
+import time
 from dash import Dash, html, dcc
 import random
-from src.discord import DiscordLink
+from src.discord import DISCORD_LIVEJOBS, DISCORD_LIVEJOBS_LAST_UPDATE, DiscordLink
 from src.nGraph import nGraph
 
 from src.mj import getRunningJobsForUser
@@ -29,14 +30,50 @@ def getJobs(userId: str):
 import networkx as nx
 
 
-def random_job(graph: nGraph, userId: str, type: NodeType = None):
-    DL = DiscordLink()
-    print("random_job")
+def fetchLastUpdate():
+    global DISCORD_LIVEJOBS_LAST_UPDATE
+    return int(DISCORD_LIVEJOBS_LAST_UPDATE)
 
-    jobs = getJobs(userId)
-    if jobs is None:
-        print(" Jobs was none!")
-        return html.Div([html.H4("Too many running jobs")])
+
+def setLastUpdate(x):
+    global DISCORD_LIVEJOBS_LAST_UPDATE
+    DISCORD_LIVEJOBS_LAST_UPDATE = x
+
+
+def fetchLiveJobs():
+    global DISCORD_LIVEJOBS
+    return int(DISCORD_LIVEJOBS)
+
+
+def setLiveJobs(x):
+    global DISCORD_LIVEJOBS
+    DISCORD_LIVEJOBS = x
+
+
+def random_job(graph: nGraph, userId: str, type: NodeType = NodeType.prompt):
+    DL = DiscordLink()
+
+    last = int(fetchLastUpdate())
+
+    if (int(time.time()) - last) > 10:
+        print("issuing an info to get an up to date job count")
+        print(DL.info())
+        print("Waiting for the discum to receive job info: last is:", last)
+        while last == fetchLastUpdate():
+            # print("OPENING")
+            time.sleep(0.3)
+            print(
+                f"looping: last:{last}, live:{fetchLastUpdate()}, jobs:{fetchLiveJobs()}"
+            )
+    jobs = fetchLiveJobs()
+    if jobs > 12:
+        print("Too many jobs!")
+        return html.Div([html.H4("too many running jobs")])
+
+    jobs = jobs + 1
+    setLiveJobs(jobs)
+
+    print("There are now", jobs, "Running jobs")
 
     node = graph.random_node(type)
     if node is None:
@@ -56,6 +93,8 @@ def random_job(graph: nGraph, userId: str, type: NodeType = None):
             for n in graph.nodes.data("type")
             if n[1] == NodeType.prompt
             and n[0] != node.id
+            and "--beta" not in n[0]
+            and "--upbeta" not in n[0]
             and len(list(graph.successors(n[0]))) < maxChildren
         ]
         if len(promptNodes) == 0:
@@ -63,10 +102,23 @@ def random_job(graph: nGraph, userId: str, type: NodeType = None):
                 "THERE ARE NO PROMPT NODES WITH FEWER THAN ", maxChildren, " CHILDREN"
             )
             print("Picking a node with no descendents for a variation job.")
-            nodeId = secrets.choice(
-                [n for n in list(graph.nodes) if graph.out_degree(n) == 0]
-            )
-            node = graph.nodes[nodeId]["node"]
+            node = secrets.choice(
+                [
+                    n
+                    for n in graph.nodes(data=True)
+                    if "--beta" not in n[0]
+                    and "--upbeta" not in n[0]
+                    and graph.out_degree(n[0]) == 0
+                ]
+            )[1]["node"]
+            # print("Node id we picked as alternative:", nodeId)
+            # node = graph.nodes[nodeId]["node"]
+            print("And the node itself we picked:", node)
+        else:
+            print("Chosen node had too many children... fetching another instead")
+            node = graph.nodes[secrets.choice(promptNodes)[0]]["node"]
+            print(DL.imagine(node.id, node))
+            return html.Div([html.H4("Running prompt as random job: " + node.prompt)])
         # Get a random node from descendents of prompt node that was picked.
         # node = secrets.choice(
         #     [n for n in list(nx.descendants(graph, node.id)) if graph.out_degree(n) < 3]

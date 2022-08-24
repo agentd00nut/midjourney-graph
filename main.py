@@ -2,11 +2,12 @@ from time import sleep
 from dash import Dash, html, dcc, Input, Output, State, dash
 from dash.dependencies import Input, Output
 from dash._callback_context import callback_context
+from src.callbacks.infoListener import lolidk
 from src.callbacks.randomJob import random_job
 from src.callbacks.runJob import runJob
 from src.callbacks.selection import selection as cb_selection
 
-from src.discord import DiscordLink
+from src.discord import DISCORD_AUTHORIZATION, DiscordLink
 from src.job import jobFromJson
 from src.mj import getJobStatus, getRecentJobsForUser
 from src.node import NodeType, nodeFromJob
@@ -27,6 +28,14 @@ def callSelection(selection):
     # TODO:: call the graph to redraw itself...
 
     return 0
+
+
+@app.callback(Output("dothing", "n_clicks"), [Input("dothing", "n_clicks")])
+def startInfoListener(clicks):
+    if clicks == 0:
+        print("Starting the info listener")
+        lolidk(clicks)
+    return 1
 
 
 @app.callback(Output("nodes", "children"), [Input("net", "selection")])
@@ -289,6 +298,7 @@ def mainFun(userId, numJobs, page, jobsPerQuery, refresh_graph, intervals):
 
 
 if __name__ == "__main__":
+
     app.run_server(
-        debug=True, dev_tools_hot_reload=True, host="192.168.50.160", port=8050
+        debug=False, dev_tools_hot_reload=False, host="192.168.50.160", port=8050
     )

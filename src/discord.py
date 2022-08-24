@@ -6,7 +6,8 @@ DISCORD_COOKIE = None
 DISCORD_AUTHORIZATION = None
 DISCORD_SESSION = None
 DISCORD_CHANNEL = None
-
+DISCORD_LIVEJOBS = 0
+DISCORD_LIVEJOBS_LAST_UPDATE = 0
 try:
     with open("conf\discord.cookie", "r") as f:
         DISCORD_COOKIE = f.read().strip("\n")
@@ -84,6 +85,23 @@ class DiscordLink:
         print(node.id, payload)
         return self.POST(url, payload=payload)
 
+    def info(self):
+        payload = {
+            "type": 2,
+            "application_id": "936929561302675456",
+            "guild_id": "662267976984297473",
+            "channel_id": "945077390839787570",  # daily_theme
+            "session_id": DISCORD_SESSION,
+            "data": {
+                "version": "987795925764280356",
+                "id": "972289487818334209",
+                "name": "info",
+                "type": 1,
+            },
+        }
+        print(payload)
+        return self.POST("https://discord.com/api/v9/interactions", payload=payload)
+
     def imagine(
         self,
         prompt: str,
@@ -95,12 +113,11 @@ class DiscordLink:
         Need a better way to handle the channel at some point.
         """
         url = "https://discord.com/api/v9/interactions"
-        print("imagine:", prompt, DISCORD_SESSION)
+        print("imagine:", prompt)
         if DISCORD_SESSION is None:
             print("Error: discord.sessionId not found... dont try to run a job")
             return None
-        print(node)
-        print(node.job)
+
         channelId = DISCORD_CHANNEL
         if node is not None and node.job.user_id == MIDJ_USER:
             print("checking for thread id")

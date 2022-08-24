@@ -18,8 +18,13 @@ class nGraph(nx.DiGraph):
             return None
 
         if type:
-            nodes = [n for n in self.nodes(data="type") if n[1] == type]
+            nodes = [
+                n
+                for n in self.nodes(data="type")
+                if "--beta" not in n[0] and "--upbeta" not in n[0] and n[1] == type
+            ]
             print(f"random_node: Found {len(nodes)} for type {type} choosing one")
+            print(nodes)
             randNode = secrets.choice(nodes)
             node = self.nodes[randNode[0]]
             return node["node"]

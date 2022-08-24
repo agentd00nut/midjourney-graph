@@ -146,7 +146,8 @@ layout = html.Div(
                 ),
                 dcc.Interval(
                     id="interval-random-job",
-                    interval=13 * 1000,  # 90 is nice and safe; 13-15 seems to keep the queue full but; it's a bit dicey
+                    interval=13
+                    * 1000,  # 90 is nice and safe; 13-15 seems to keep the queue full but; it's a bit dicey
                     n_intervals=0,
                     disabled=False,
                 ),
@@ -255,7 +256,7 @@ layout = html.Div(
                                             debounce=True,
                                             min=1,
                                             max=100,
-                                            value=4,
+                                            value=30,
                                             style={"width": "40px"},
                                         ),
                                         "Start Page:",
@@ -288,6 +289,9 @@ layout = html.Div(
                                         html.Br(),
                                         html.Button(
                                             "clear graph", id="clear", n_clicks=0
+                                        ),
+                                        html.Button(
+                                            "dothing", id="dothing", n_clicks=0
                                         ),
                                     ],
                                     style={"padding-bottom": "30px"},
