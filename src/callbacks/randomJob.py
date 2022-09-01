@@ -36,6 +36,9 @@ with open("conf\discord.cookie", "r") as f:
 import networkx as nx
 
 
+# I know this is not how you need to use globals; i was trying to see if doing it this
+#       way would let threads get "updated" globals... it did not, and now
+#       it looks really dumb :)
 def fetchLastUpdate():
     global DISCORD_LIVEJOBS_LAST_UPDATE
     return int(DISCORD_LIVEJOBS_LAST_UPDATE)
@@ -70,6 +73,7 @@ def random_job(graph: nGraph, userId: str, type: NodeType = NodeType.prompt):
                 print("Sending info request...")
                 print(DL.info())
                 lastInfoRequest = time.time()
+                setLastUpdate(lastInfoRequest)
             time.sleep(1.0)
             print(
                 f"Waiting for updated job count... lastUpdate:{last}, live:{fetchLastUpdate()}, jobs:{fetchLiveJobs()}... lastInfoRequest:{lastInfoRequest}"
