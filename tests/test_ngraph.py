@@ -33,7 +33,7 @@ def findNodeWithLowSuccessors(graph: nGraph, node: str, maxSuccessors=3):
         ]
         if c is not None
     ]
-    print(node, matches)
+    # print(node, matches)
     if len(matches) > 0:
         return secrets.choice(matches)
 

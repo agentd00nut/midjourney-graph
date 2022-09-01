@@ -49,30 +49,9 @@ def callSelection(selection):
 )
 def callGraphControls(n_clicks):
     if n_clicks % 2 == 0:
-        return {"width": "16vw", "overflow": "auto", "display": "none"}
+        return {"order": 1, "width": "16vw", "overflow": "auto", "display": "none"}
     else:
-        return {"width": "16vw", "overflow": "auto"}
-
-
-@app.callback(Output("net", "run"), [Input("graphControls", "id")])
-def initControls(controls):
-    """
-    Initialize the controls for the graph.
-
-    We have to do it this way, apparently, since visjss expects a DOM element and not just an id.
-    And we don't have a way (that i know of) to get the DOM element from python... lol there's probably like a one line way to do it.
-    """
-
-    return f"""
-    let controls=document.getElementById('{controls}');
-    
-    let options = this.props.options;
-    options.configure.enabled = true;
-    options.configure.container=controls;
-
-    console.log("adding opts to net");
-    this.net.setOptions(options);
-    """
+        return {"order": 1, "width": "16vw", "overflow": "auto"}
 
 
 run_random_job = 0
@@ -82,7 +61,6 @@ run_random_job = 0
 def toggleRandomRun(value):
     callback_context.triggered[0]["prop_id"]
     global run_random_job
-    print("WOW")
     if run_random_job == 0:
         run_random_job = 1
         print("RANDOM IS NOW ON")
@@ -297,8 +275,27 @@ def mainFun(userId, numJobs, page, jobsPerQuery, refresh_graph, intervals):
     return data
 
 
-if __name__ == "__main__":
+@app.callback(Output("net", "run"), [Input("graphControls", "id")])
+def initControls(controls):
+    """
+    Initialize the controls for the graph.
 
+    We have to do it this way, apparently, since visjss expects a DOM element and not just an id.
+    And we don't have a way (that i know of) to get the DOM element from python... lol there's probably like a one line way to do it.
+    """
+    return f"""
+    let controls=document.getElementById('{controls}');
+
+    let options = this.props.options;
+    options.configure.enabled = true;
+    options.configure.container=controls;
+
+    console.log("adding opts to net");
+    this.net.setOptions(options);
+    """
+
+
+if __name__ == "__main__":
     app.run_server(
-        debug=False, dev_tools_hot_reload=False, host="192.168.50.160", port=8050
+        debug=True, dev_tools_hot_reload=False, host="192.168.50.160", port=8050
     )

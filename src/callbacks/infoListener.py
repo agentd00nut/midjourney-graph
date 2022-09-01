@@ -35,9 +35,9 @@ def lolidk(clicks):
                 if "**Subscription**" not in desc:  # avoids "Your job is now running"
                     return
 
-                print("DESCRIPTION:\n", desc)
+                # print("DESCRIPTION:\n", desc)
                 results = runningJobs.findall(desc)
-                print("RESULTS:\n", results)
+                # print("RESULTS:\n", results)
                 jobs = sum([int(n) for n in results])
 
                 DISCORD_LIVEJOBS = int(jobs)

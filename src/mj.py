@@ -30,7 +30,7 @@ def mj_POST(url, json=None):
     cookie_jar = requests.cookies.RequestsCookieJar()
     cookie_jar.update(simple_cookie)
 
-    print(json)
+    # print(json)
     r = requests.post(url, json=json, headers=MIDJOURNEY_HEADERS, cookies=cookie_jar)
     if not r:
         print("Error: ")
@@ -66,7 +66,7 @@ def getRecentJobsForUser(userId, page, jobs_per_page, max_jobs):
     while len(recent_jobs) < int(max_jobs):
         querystring = {
             "amount": jobs_per_page,
-            "orderBy": "enqueueTime",
+            "orderBy": "new",
             "jobStatus": "completed",
             "orderDirection": "desc",
             "userId": userId,
@@ -80,7 +80,7 @@ def getRecentJobsForUser(userId, page, jobs_per_page, max_jobs):
             print("we got bonked by midjourney api", result.reason)
             sleep(5)
             continue
-
+        # print(result.text)
         recent_jobs.extend(result.json())
         # print(len(recent_jobs), page)
         page += 1

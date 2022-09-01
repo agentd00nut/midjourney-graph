@@ -6,6 +6,7 @@ DISCORD_COOKIE = None
 DISCORD_AUTHORIZATION = None
 DISCORD_SESSION = None
 DISCORD_CHANNEL = None
+DISCORD_GUILD = None
 DISCORD_LIVEJOBS = 0
 DISCORD_LIVEJOBS_LAST_UPDATE = 0
 try:
@@ -20,6 +21,10 @@ try:
 
     with open("conf\discord.channel", "r") as f:
         DISCORD_CHANNEL = f.read().strip("\n")
+
+    with open("conf\discord.guild", "r") as f:
+        DISCORD_GUILD = f.read().strip("\n")
+
 except FileNotFoundError:
     print(
         "Error: discord.cookie, discord.authorization, or discord.sessionId not found... dont try to run a job"
@@ -82,7 +87,7 @@ class DiscordLink:
             "session_id": DISCORD_SESSION,
             "data": {"component_type": 2, "custom_id": type},
         }
-        print(node.id, payload)
+        # print(node.id, payload)
         return self.POST(url, payload=payload)
 
     def info(self):
@@ -99,7 +104,7 @@ class DiscordLink:
                 "type": 1,
             },
         }
-        print(payload)
+        # print(payload)
         return self.POST("https://discord.com/api/v9/interactions", payload=payload)
 
     def imagine(
@@ -113,19 +118,18 @@ class DiscordLink:
         Need a better way to handle the channel at some point.
         """
         url = "https://discord.com/api/v9/interactions"
-        print("imagine:", prompt)
         if DISCORD_SESSION is None:
             print("Error: discord.sessionId not found... dont try to run a job")
             return None
 
         channelId = DISCORD_CHANNEL
         if node is not None and node.job.user_id == MIDJ_USER:
-            print("checking for thread id")
+            # print("checking for thread id")
             channelId = node.job.platform_channel_id
             if node.job.platform_thread_id is not None:
                 channelId = node.job.platform_thread_id
-                print("using thread id", channelId)
-        print("channelId", channelId)
+                # print("using thread id", channelId)
+        # print("channelId", channelId)
         # Uses default channel if we dont own node, else thread, else channel
         # c = (
         #     DISCORD_CHANNEL
@@ -141,7 +145,7 @@ class DiscordLink:
             "channel_id": channelId,  # TODO:: Better channel handling for /imagine prompts
             "application_id": "936929561302675456",
             "session_id": DISCORD_SESSION,
-            "guild_id": "662267976984297473" if node is None else node.job.guild_id,
+            "guild_id": DISCORD_GUILD if node is None else node.job.guild_id,
             "data": {
                 "version": "994261739745050686",
                 "id": "938956540159881230",
@@ -151,7 +155,7 @@ class DiscordLink:
                 "attachments": [],
             },
         }
-        print(payload)
+        # print(payload)
         return self.POST(url, payload=payload)
 
     def fast(
@@ -232,5 +236,5 @@ class DiscordLink:
                 "custom_id": "MJ::JOB::upsample_max::1::SOLO",
             },
         }
-        print(payload)
+        # print(payload)
         return self.POST(url, payload=payload)

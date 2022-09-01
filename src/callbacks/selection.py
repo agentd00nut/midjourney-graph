@@ -32,7 +32,14 @@ def selection(graph: nGraph, selections):
 
     x = []  # clunky way to build x...
     if node["image"]:
-        x.append(html.Img(src=node["image"], style={"max-width": "40vw"}))
+        x.append(
+            html.Img(
+                src="https://storage.googleapis.com/dream-machines-output/"
+                + node["id"]
+                + "/grid_0.webp",
+                style={"max-width": "40vw"},
+            )
+        )
     x.append(
         html.A(
             html.H4("Goto discord"),

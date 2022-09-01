@@ -24,7 +24,7 @@ class nGraph(nx.DiGraph):
                 if "--beta" not in n[0] and "--upbeta" not in n[0] and n[1] == type
             ]
             print(f"random_node: Found {len(nodes)} for type {type} choosing one")
-            print(nodes)
+            # print(nodes)
             randNode = secrets.choice(nodes)
             node = self.nodes[randNode[0]]
             return node["node"]

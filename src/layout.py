@@ -10,47 +10,13 @@ except FileNotFoundError:
 
 NETOPTS_2 = {
     "nodes": {
-        "borderWidth": None,
-        "borderWidthSelected": None,
         "color": {"highlight": {}, "hover": {}},
-        "font": {"size": 23, "strokeWidth": None},
-        "scaling": {"min": 106, "max": 200},
-        "shapeProperties": {"borderRadius": None},
-        "size": 17,
+        "font": {"size": 0, "strokeWidth": 8},
+        "scaling": {"min": 900, "max": 1000},
+        "size": 300,
     },
-    "edges": {
-        "arrows": {"to": {"enabled": True}},
-        "font": {"size": 61, "strokeWidth": 3},
-        "scaling": {"min": 11},
-        "selectionWidth": 8,
-        "selfReferenceSize": 15,
-        "smooth": False,
-    },
-    "manipulation": {"enabled": True, "initiallyActive": True},
-    "physics": {
-        "repulsion": {
-            "centralGravity": 2.25,
-            "springLength": 450,
-            "nodeDistance": 2075,
-            "damping": 0.21,
-        },
-        "minVelocity": 0.75,
-        "solver": "repulsion",
-    },
-}
-
-NETOPTS = dict(
-    # height='400px',
-    # width='60%',
-    nodes={
-        "scaling": {"min": 10, "max": 50},
-        "value": 1,
-        "size": 17,
-        "font": {"size": 23},
-        "scaling": {"min": 106, "max": 200},
-    },
-    configure={"enabled": False},
-    layout={
+    "configure": {"enabled": True},
+    "layout": {
         "hierarchical": {
             "enabled": False,
             "levelSeparation": 200,
@@ -59,41 +25,30 @@ NETOPTS = dict(
             "sortMethod": "directed",
         }
     },
-    edges={
-        "arrows": {"to": {"enabled": True, "scaleFactor": 1}},
+    "edges": {
+        "arrows": {"to": {"enabled": True}},
         "font": {"size": 61, "strokeWidth": 3},
-        "selectionWidth": 8,
-        "scaling": {"min": 11},
-        "selectionWidth": 8,
+        "scaling": {"min": 50, "max": 100},
+        "selectionWidth": 26,
         "selfReferenceSize": 15,
-        "value": 1,
-        "smooth": False,
+        "smooth": {"type": "cubicBezier", "forceDirection": "none", "roundness": 1},
     },
-    manipulation={
-        "enabled": True,
-        "initiallyActive": True  # "initiallyActive": True,
-        # "addNode": False,
-        # "addEdge": False,
-        # "deleteNode": True,
-        # "deleteEdge": True,
-    },
-    physics={
-        "repulsion": {
-            "springLength": 475,
-            "springConstant": 0.01,
-            "nodeDistance": 500,
-            "damping": 0.07,
+    "manipulation": {"enabled": True, "initiallyActive": True},
+    "physics": {
+        "forceAtlas2Based": {
+            "gravitationalConstant": -29523,
+            "centralGravity": 0.005,
+            "springLength": 4000,
+            "springConstant": 0.05,
+            "damping": 0.6,
+            "avoidOverlap": 0.88,
         },
-        "hierarchicalRepulsion": {
-            "centralGravity": 0,
-            "springLength": 475,
-            "nodeDistance": 500,
-            "damping": 0.09,
-        },
-        "minVelocity": 0.75,
-        "solver": "repulsion",
+        "maxVelocity": 216,
+        "minVelocity": 5,
+        "solver": "forceAtlas2Based",
+        "timestep": 1,
     },
-)
+}
 
 
 NETOPTS = NETOPTS_2
@@ -113,7 +68,7 @@ layout = html.Div(
                 "display": "flex",
                 "flexDirection": "column",
                 "order": 1,
-                "flex-grow": 2,
+                "flexGrow": 2,
             },
             children=[
                 html.Div(
@@ -146,7 +101,7 @@ layout = html.Div(
                 ),
                 dcc.Interval(
                     id="interval-random-job",
-                    interval=13
+                    interval=400
                     * 1000,  # 90 is nice and safe; 13-15 seems to keep the queue full but; it's a bit dicey
                     n_intervals=0,
                     disabled=False,
@@ -283,8 +238,7 @@ layout = html.Div(
                                         html.Button(
                                             "toggle_random",
                                             id="toggle_random",
-                                            value="1",
-                                            n_clicks=0,
+                                            n_clicks=1,
                                         ),
                                         html.Br(),
                                         html.Button(
@@ -294,7 +248,7 @@ layout = html.Div(
                                             "dothing", id="dothing", n_clicks=0
                                         ),
                                     ],
-                                    style={"padding-bottom": "30px"},
+                                    style={"paddingBottom": "30px"},
                                 ),
                             ],
                         ),
@@ -305,7 +259,7 @@ layout = html.Div(
         ),
         html.Div(
             id="nodes",
-            style={"position": "absolute", "align-items": "center", "right": "0px"},
+            style={"position": "absolute", "alignItems": "center", "right": "0px"},
         ),
     ],
 )

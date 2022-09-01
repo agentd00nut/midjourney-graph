@@ -26,6 +26,12 @@ def getJobs(userId: str):
     return jobs
 
 
+PROMPT_IGNORE_LIST = []
+with open("conf\discord.cookie", "r") as f:
+    PROMPT_IGNORE_LIST = f.read().splitlines()
+    print("Loaded ", len(PROMPT_IGNORE_LIST), " prompts to ignore")
+
+
 # [node for node in ng.nodes if ng.out_degree(node) < 1]
 import networkx as nx
 
@@ -51,22 +57,25 @@ def setLiveJobs(x):
 
 
 def random_job(graph: nGraph, userId: str, type: NodeType = NodeType.prompt):
+    global PROMPT_IGNORE_LIST
     DL = DiscordLink()
-
+    maxChildren = 5
     last = int(fetchLastUpdate())
 
-    if (int(time.time()) - last) > 10:
-        print("issuing an info to get an up to date job count")
-        print(DL.info())
-        print("Waiting for the discum to receive job info: last is:", last)
+    if (int(time.time()) - last) > 20:
+
+        lastInfoRequest = 0.0
         while last == fetchLastUpdate():
-            # print("OPENING")
-            time.sleep(0.3)
+            if lastInfoRequest == 0.0 or time.time() - lastInfoRequest > 5:
+                print("Sending info request...")
+                print(DL.info())
+                lastInfoRequest = time.time()
+            time.sleep(1.0)
             print(
-                f"looping: last:{last}, live:{fetchLastUpdate()}, jobs:{fetchLiveJobs()}"
+                f"Waiting for updated job count... lastUpdate:{last}, live:{fetchLastUpdate()}, jobs:{fetchLiveJobs()}... lastInfoRequest:{lastInfoRequest}"
             )
     jobs = fetchLiveJobs()
-    if jobs > 12:
+    if jobs > 5:
         print("Too many jobs!")
         return html.Div([html.H4("too many running jobs")])
 
@@ -82,7 +91,7 @@ def random_job(graph: nGraph, userId: str, type: NodeType = NodeType.prompt):
 
     # If a prompt node already has enough children, switch to run a job on one of its children.
     if node.type == type and type == NodeType.prompt:
-        maxChildren = 2
+
         if graph.out_degree(node.id) < maxChildren:
             print(DL.imagine(node.id, node))
             return html.Div([html.H4("Running prompt as random job: " + node.prompt)])
@@ -93,14 +102,13 @@ def random_job(graph: nGraph, userId: str, type: NodeType = NodeType.prompt):
             for n in graph.nodes.data("type")
             if n[1] == NodeType.prompt
             and n[0] != node.id
-            and "--beta" not in n[0]
-            and "--upbeta" not in n[0]
+            and n[0] not in PROMPT_IGNORE_LIST
             and len(list(graph.successors(n[0]))) < maxChildren
         ]
         if len(promptNodes) == 0:
-            print(
-                "THERE ARE NO PROMPT NODES WITH FEWER THAN ", maxChildren, " CHILDREN"
-            )
+            # print(
+            #     "THERE ARE NO PROMPT NODES WITH FEWER THAN ", maxChildren, " CHILDREN"
+            # )
             print("Picking a node with no descendents for a variation job.")
             node = secrets.choice(
                 [
@@ -113,7 +121,7 @@ def random_job(graph: nGraph, userId: str, type: NodeType = NodeType.prompt):
             )[1]["node"]
             # print("Node id we picked as alternative:", nodeId)
             # node = graph.nodes[nodeId]["node"]
-            print("And the node itself we picked:", node)
+            # print("And the node itself we picked:", node)
         else:
             print("Chosen node had too many children... fetching another instead")
             node = graph.nodes[secrets.choice(promptNodes)[0]]["node"]
