@@ -102,6 +102,7 @@ class Node:
         """Uses the id of the node (from midjourney) as the hash, letting us add it into nxgraphs"""
         return self.id.__hash__()
 
+    # IDE might say this has no references; it does!
     def asvisDCCData(self):
         return {
             "id": self.id,
