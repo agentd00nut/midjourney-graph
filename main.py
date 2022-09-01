@@ -159,7 +159,7 @@ def runRelax(relax):
     DL = DiscordLink()
     results = DL.relax()
     mode = "relax"
-    print(mode)
+    print(results, mode)
     return lastRelax
 
 
@@ -298,5 +298,5 @@ def initControls(controls):
 if __name__ == "__main__":
 
     app.run_server(
-        debug=False, dev_tools_hot_reload=False, host="192.168.50.160", port=8050
+        debug=True, dev_tools_hot_reload=False, host="192.168.50.160", port=8050
     )
