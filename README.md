@@ -4,12 +4,10 @@
 
 Shows the graph of recent jobs run by the provider userID for midjourney.
 
-Also provides an interface to issue commands to the midjourney bot by hitting the discord API, discord might frown on that behavior though, use those buttons at your own risk.
+Also provides an interface to issue commands to the midjourney bot by hitting the discord API, discord might frown on that behavior 
+though, use those buttons at your own risk.
 
-### License
-
-Whatever the one that means "give me some money if you make money with it, otherwise do what you want, not my fault if your computer explodes from using this"
-
+Uses [discum](https://github.com/Merubokkusu/Discord-S.C.U.Mhttps://github.com/Merubokkusu/Discord-S.C.U.M) to scan for /info requests to parse the results to see how many running jobs you currently have to avoid hitting queue limits when running random job logic.  
 # Setup
 
 `pip install -r requirements.txt`
@@ -17,6 +15,39 @@ Whatever the one that means "give me some money if you make money with it, other
 Follow the authorization steps down below then...
 
 `python main.py`
+
+# Security
+
+Obviously putting all of your cookies and sessions to both discord and midjourney into plain text files on your hard drive is not... the most great idea.  All of the (spaghetti) code in graph is straight forward so you can see we're not doing anything suspicious with your credentials besides using them to call discord api's (though technically we're self botting which is a TOS violation) and midjourney api (which aren't technically public but we try really hard to be gentle on their api.)
+
+Use at your discretion; obviously anything bad that happens from using this is entirely your own fault.
+
+# Risks
+
+Likely none besides whats said in the security section.
+
+I've used this personally for about a month and left it running overnight, running hundreds of relaxed jobs and nothing bad has happened.  That said; again; technically it is "self-botting" on discord and is using semi-private midjourney apis.  
+
+### License
+
+Whatever the one that means "give me some money if you make money with it, otherwise do what you want, not my fault if your computer explodes from using this"
+
+
+# Super quick authorization steps
+
+You need the following files all in a `conf/` dir; make it if it doesn't exist.
+
+```
+discord.authorization   -- Header sent on interaction requests from discord web ui
+discord.channel         -- What channel /imagine commands should go to;
+discord.cookie          -- The entire cookie from the header on interaction requests from discord web ui
+discord.guild           -- what guild the channel id is in when using /imagine
+discord.sessionId       -- found WITHIN the payload of an interaction request
+midj.cookie             -- the full cookie from any call to the api when browsing midjourney web app
+midj.user               -- easily found from URL bar when viewing your own profile as a visitor. its the big number.
+```
+
+Place each piece of information in the files; you'll need to make the files; yes this is a goofy way to do the setup but that's okay.
 
 # Use
 
