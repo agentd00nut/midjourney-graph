@@ -77,16 +77,6 @@ class nGraph(nx.DiGraph):
             # )
 
     def getVisDCCData(self):
-        # We were having some difficulties here
-        # #print("NODES")
-        # #print(self.nodes)
-        # #print("NODES")
-        # for n in self.nodes(data=True):
-        # #print("WAHT THE FUCK")
-        # #print(n)
-        # #print('node',n[1]['node'].asvisDCCData())
-        # for e in self.edges(data=True):
-        # #print('edge',e[2])
         wow = {}
         wow = {
             "nodes": [n[1]["node"].asvisDCCData() for n in self.nodes(data=True)],

@@ -29,7 +29,7 @@ def selection(graph: nGraph, selections):
 
     # Its not actually that intersting to see the depth; originally done for hierarchical graphs; but they seem to know what to do just fine without it.
     # html.H4('Predecessors:'+str(depth))
-
+    ##
     x = []  # clunky way to build x...
     if node["image"]:
         x.append(

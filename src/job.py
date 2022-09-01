@@ -7,7 +7,7 @@ class Job:
     image_paths: list[str]
     image: str
     status: str
-    # duration: str
+    ## duration: str
     enqueue_time: str
     reference_job_id: str
     reference_image_num: int

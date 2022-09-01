@@ -210,6 +210,7 @@ class DiscordLink:
 
         return self.POST(url, payload=payload)
 
+    ##
     def max(
         self,
         node: Node,

@@ -1,16 +1,16 @@
 from time import sleep
-from dash import Dash, html, dcc, Input, Output, State, dash
+from dash import Dash, html, Input, Output, State
 from dash.dependencies import Input, Output
 from dash._callback_context import callback_context
 from src.callbacks.runJob import runJob
 from src.callbacks.selection import selection as cb_selection
 
-from src.discord import DISCORD_AUTHORIZATION, DiscordLink
+from src.discord import DiscordLink
 from src.job import jobFromJson
 from src.mj import getJobStatus, getRecentJobsForUser
 from src.node import NodeType, nodeFromJob
 from src.nGraph import nGraph
-from src.layout import MIDJ_USER, layout
+from src.layout import layout
 
 app = Dash(__name__)
 
