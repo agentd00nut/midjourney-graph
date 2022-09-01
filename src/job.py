@@ -33,20 +33,19 @@ def jobFromJson(j):
     return Job(
         id=j["id"],
         image_paths=j["image_paths"],
-        image=job_image_root + "grid_0.webp"
-        if len(j["image_paths"]) == 4
-        else j["image_paths"][0],
+        image=j["image_paths"][0]
+        if len(j["image_paths"]) == 1
+        else job_image_root + "grid_0.webp",
         status=j["current_status"],
         enqueue_time=j["enqueue_time"],
         reference_job_id=j["reference_job_id"],
         reference_image_num=j["reference_image_num"],
         reference_image_path="https://storage.googleapis.com/dream-machines-output/"
         + j["reference_job_id"]
-        + "/0_"
-        + j["reference_image_num"]
-        + ".png"
-        if j["reference_job_id"] is not None
-        else None,
+        + "/grid_0"
+        # + j["reference_image_num"]
+        # + ".png"
+        if j["reference_job_id"] is not None else None,
         prompt=j["prompt"],
         full_command=j["full_command"],
         platform=j["platform"],
