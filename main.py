@@ -2,8 +2,6 @@ from time import sleep
 from dash import Dash, html, dcc, Input, Output, State, dash
 from dash.dependencies import Input, Output
 from dash._callback_context import callback_context
-from src.callbacks.infoListener import lolidk
-from src.callbacks.randomJob import random_job
 from src.callbacks.runJob import runJob
 from src.callbacks.selection import selection as cb_selection
 
@@ -30,14 +28,6 @@ def callSelection(selection):
     return 0
 
 
-@app.callback(Output("dothing", "n_clicks"), [Input("dothing", "n_clicks")])
-def startInfoListener(clicks):
-    if clicks == 0:
-        print("Starting the info listener")
-        lolidk(clicks)
-    return 1
-
-
 @app.callback(Output("nodes", "children"), [Input("net", "selection")])
 def callSelection(selection):
     global graph
@@ -52,39 +42,6 @@ def callGraphControls(n_clicks):
         return {"order": 1, "width": "16vw", "overflow": "auto", "display": "none"}
     else:
         return {"order": 1, "width": "16vw", "overflow": "auto"}
-
-
-run_random_job = 0
-
-
-@app.callback(Output("toggle_random", "n_clicks"), [Input("toggle_random", "n_clicks")])
-def toggleRandomRun(value):
-    callback_context.triggered[0]["prop_id"]
-    global run_random_job
-    if run_random_job == 0:
-        run_random_job = 1
-        print("RANDOM IS NOW ON")
-        return 0
-    else:
-        print("RANDOM IS NOW OFF")
-        run_random_job = 0
-        return 0
-
-
-@app.callback(
-    Output("random_job", "n_clicks"),
-    [Input("interval-random-job", "n_intervals"), Input("random_job", "n_clicks")],
-)
-def callRandomJob(n_intervals, n_clicks):
-    global graph
-    global run_random_job
-    if run_random_job == 0:
-        print(
-            "not running random job, run random is off... though i understand how thats annoying lol"
-        )
-        return 1
-    print(random_job(graph, MIDJ_USER, NodeType.prompt))
-    return 1
 
 
 lastFast = 0

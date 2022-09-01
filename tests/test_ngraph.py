@@ -5,7 +5,6 @@ import pytest
 from src.nGraph import nGraph
 from src.node import Node, NodeType
 from src.edge import Edge
-import random
 
 
 def findNodeWithLowSuccessors(graph: nGraph, node: str, maxSuccessors=3):
@@ -65,14 +64,6 @@ class TestnGraph:
         ng = nGraph()
         assert ng is not None
 
-    def test_randomNode_type(self):
-        ng = nGraph()
-        ng.add_node(Node("p1", type=NodeType.prompt))
-        ng.add_node(Node("v1", type=NodeType.variation, reference_job_id="r1"))
-        ng.add_node(Node("r1", type=NodeType.reference))
-
-        n = ng.random_node(type=NodeType.prompt)
-        assert n.id == "p1"
 
     def test_add_node(self):
         ng = nGraph()

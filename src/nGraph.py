@@ -10,35 +10,6 @@ class nGraph(nx.DiGraph):
     def __init__(self) -> None:
         super().__init__(self)
 
-    def random_node(self, type: NodeType | None = None):
-
-        n = self.number_of_nodes()
-        if n == 0:
-            print("Cant get random node, no node in graph")
-            return None
-
-        if type:
-            nodes = [
-                n
-                for n in self.nodes(data="type")
-                if "--beta" not in n[0] and "--upbeta" not in n[0] and n[1] == type
-            ]
-            print(f"random_node: Found {len(nodes)} for type {type} choosing one")
-            # print(nodes)
-            randNode = secrets.choice(nodes)
-            node = self.nodes[randNode[0]]
-            return node["node"]
-
-        node = self.nodes[secrets.choice(list(self.nodes))]
-        # print("Picked random node", node)
-        # if type is not None:
-        #     while node.node.type != type:
-        #         node: Node = self.nodes[secrets.choice(list(self.nodes))][
-        #             "node"
-        #         ]  # TODO:: Ask graph for  all the prompt nodes directly... this is silly.
-
-        return node
-
     def add_mj_node(self, node: Node):
 
         if node is None:

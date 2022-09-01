@@ -99,18 +99,10 @@ layout = html.Div(
                     n_intervals=0,
                     disabled=False,
                 ),
-                dcc.Interval(
-                    id="interval-random-job",
-                    interval=13
-                    * 1000,  # Discum should mean we don't go over limits; however slower is less likely to raise flags
-                    n_intervals=0,
-                    disabled=True,
-                ),
                 html.Div(
                     id="input-container",
                     style={"order": 1},
                     children=[
-                        html.Div(id="random_job_id"),
                         html.Div(id="node_info"),
                         html.Div(id="configure"),
                         html.Div(
@@ -228,17 +220,6 @@ layout = html.Div(
                                             "Refresh_Graph",
                                             id="refresh_graph",
                                             name="refresh_graph_button",
-                                        ),
-                                        html.Button(
-                                            "Random_Job",
-                                            id="random_job",
-                                            name="randomb_job_button",
-                                            n_clicks=0,
-                                        ),
-                                        html.Button(
-                                            "toggle_random",
-                                            id="toggle_random",
-                                            n_clicks=1,
                                         ),
                                         html.Br(),
                                         html.Button(

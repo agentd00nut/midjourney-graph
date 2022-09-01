@@ -4,10 +4,9 @@
 
 Shows the graph of recent jobs run by the provider userID for midjourney.
 
-Also provides an interface to issue commands to the midjourney bot by hitting the discord API, discord might frown on that behavior 
-though, use those buttons at your own risk.
+Also provides an interface to issue commands to the midjourney bot by hitting the discord API, discord might frown on that behavior though, use those buttons at your own risk.
 
-Uses [discum](https://github.com/Merubokkusu/Discord-S.C.U.Mhttps://github.com/Merubokkusu/Discord-S.C.U.M) to scan for /info requests to parse the results to see how many running jobs you currently have to avoid hitting queue limits when running random job logic.  
+Uses [discum](https://github.com/Merubokkusu/Discord-S.C.U.Mhttps://github.com/Merubokkusu/Discord-S.C.U.M) to scan for /info requests to parse the results to see how many running jobs you currently have to avoid hitting queue limits. 
 # Setup
 
 `pip install -r requirements.txt`
@@ -87,8 +86,6 @@ Select a node
 
 `Max Upscale` not supported at the moment.
 
-`Goto Discord` will attempt to go to the job in discord, it... usually works. (i don't use it that much tbh)
-
 # The authorization setups
 
 These shouldn't need to be done more than once every few days.
@@ -102,8 +99,6 @@ Obviously this is a really dumb and insecure way to manage your credentials.
 Login to midjourney, open the dev console, go anywhere that issues a `Fetch/XHR` request to midjourney
 
 Click on any of those requests, in the headers tab scroll down and copy the entire `cookie` header string, paste it into the `conf/midj.cookie` file.
-
-**Warning:** Obviously don't share this with anyone or make it public etc..
 
 ## Getting the discord cookie / authorization string
 
@@ -121,12 +116,6 @@ Also grab the `authorization` string and put it into `conf/discord.authorization
 
 Lastly grab the `sessionId` string and put it into `conf/discord.sessionId`, make the file if it does not exist
 
-# Known issues
-
-- It's possible for a job from the midjourney api to come back with null's for the channel, thread, and message... usually this happens right before outages
-  When it does it's problematic for obvious reasons. A possible solution would be to use `/show` on the id in a known channel (DM to the bot?); Another
-  would be to check if `/interaction` requests can be performed outside the channel that the bot knows an image is in before using `/show`. Unfortunately none of these
-  _update_ the job information coming from the api
 
 # TODO
 
@@ -134,10 +123,7 @@ Vaguely in order.
 
 ## Important
 
-- [] The api can return jobs that are "invalid"; having no guild or channel or thread or message values that are otherwise "real"... so our variation requests will always fail; we should make these with a red border or some other indicator of "hey midjourney kinda donked up the data on this one"
-- [] Support less... dumb, ways of getting the necessary cookies for midj and discord.
-- [] Accept just username+Password for discord and automatically the cookies / auths we need.
-- [] Support for 2fa on discord logins.
+- [] The api can return jobs that appear to return invalid / incomplete json.
 
 ## Optimizations
 
@@ -146,11 +132,8 @@ Vaguely in order.
 
 ## Features
 
-- [] "list" view; start with just listing the previous jobs prompts; optionally with the job buttons; maybe show jobs image on hover?
 - [x] Imagine prompt input
-- [] Prompt input from files
 - [x] Prompt "mixing", prompts from the left file, permutate with modifiers in right file.
-- [] "Job" / "pattern" system... "All prompt nodes with <10 predecessors, re-run." "All prompt nodes with >=10 predecessors, ensure they have run a v1,v2,v3,v4 job."... Ideally this would be a kind of query language syntax
 - [x] Max-upscale button (unsure how to know if available)
 - [x] **Option to automatically move to `/fast` mode when issuing a "max upscale" command while in `/relax` state.**
 - [x] Fast / Relax buttons + show current state.
@@ -158,7 +141,6 @@ Vaguely in order.
 - [x] Show all running jobs status (tried to do this; technically it "works" but MJ only updates once a minute from the bot, so it can really lag our knowledge of running jobs etc.)
 - [] Any sort of "running" indicator
 - [] A second graph view (ideally within the same viewport) showing the chain of reference images for the selected node. (All the nodes would _only_ be the image referenced and not the 2x2 grids)
-- [] Hosted (obviously requires the better login managmenet)
 
 ## Unlikely to happen
 
