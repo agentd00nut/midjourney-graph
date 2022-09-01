@@ -104,7 +104,7 @@ layout = html.Div(
                     interval=13
                     * 1000,  # Discum should mean we don't go over limits; however slower is less likely to raise flags
                     n_intervals=0,
-                    disabled=False,
+                    disabled=True,
                 ),
                 html.Div(
                     id="input-container",
