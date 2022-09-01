@@ -101,8 +101,8 @@ layout = html.Div(
                 ),
                 dcc.Interval(
                     id="interval-random-job",
-                    interval=400
-                    * 1000,  # 90 is nice and safe; 13-15 seems to keep the queue full but; it's a bit dicey
+                    interval=13
+                    * 1000,  # Discum should mean we don't go over limits; however slower is less likely to raise flags
                     n_intervals=0,
                     disabled=False,
                 ),
