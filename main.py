@@ -194,7 +194,7 @@ def mainFun(userId, numJobs, page, jobsPerQuery, refresh_graph, intervals):
 
     # Get the recent jobs for the user; keep paginating until we've exceeded the max jobs.
     recent_jobs = getRecentJobsForUser(userId, page, jobsPerQuery, maxJobs)
-
+    print("Got", len(recent_jobs), "recent jobs")
     nodes = [n for n in [nodeFromJob(jobFromJson(j)) for j in recent_jobs]]
     # print("Got", len(nodes), "new nodes from", len(recent_jobs), "recent jobs")
 

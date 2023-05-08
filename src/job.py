@@ -30,12 +30,17 @@ def jobFromJson(j):
         "https://storage.googleapis.com/dream-machines-output/" + j["id"] + "/"
     )
 
+    paths=[]
+    img=""
+    if "image_paths" in j:
+        paths = j["image_paths"]
+        img=paths[0]
+    if len(paths) == 1:
+        img=job_image_root + "grid_0.webp"
     return Job(
         id=j["id"],
-        image_paths=j["image_paths"],
-        image=j["image_paths"][0]
-        if len(j["image_paths"]) == 1
-        else job_image_root + "grid_0.webp",
+        image_paths=paths,
+        image=img,
         status=j["current_status"],
         enqueue_time=j["enqueue_time"],
         reference_job_id=j["reference_job_id"],
