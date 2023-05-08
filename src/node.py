@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 
 from src.edge import Edge
-
+from src.job import Job
 from enum import Enum
 
 
