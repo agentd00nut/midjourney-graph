@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import json
 
 
 @dataclass
@@ -25,9 +26,16 @@ class Job:
 
 
 def jobFromJson(j):
+    print("jobFromJson: ", j)
 
+    if "id" not in j:
+        j = json.loads(j)
+        if "id" not in j:
+            print("jobFromJson: no id, j is: ", j)
+            return None
+    
     job_image_root = (
-        "https://storage.googleapis.com/dream-machines-output/" + j["id"] + "/"
+        "https://cdn.midjourney.com/" + j["id"] + "/"
     )
 
     paths=[]
@@ -45,7 +53,7 @@ def jobFromJson(j):
         enqueue_time=j["enqueue_time"],
         reference_job_id=j["reference_job_id"],
         reference_image_num=j["reference_image_num"],
-        reference_image_path="https://storage.googleapis.com/dream-machines-output/"
+        reference_image_path="https://cdn.midjourney.com/"
         + j["reference_job_id"]
         + "/grid_0"
         # + j["reference_image_num"]

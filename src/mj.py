@@ -2,7 +2,7 @@ import json
 from time import sleep
 from dotenv import load_dotenv
 import requests, http, os
-from pyjourney import MidjourneyAPI
+from pyjourney import GetJobsArgs, MidjourneyAPI
 
 MIDJOURNEY_COOKIE = None
 with open("conf\midj.cookie", "r") as f:
@@ -11,6 +11,7 @@ with open("conf\midj.cookie", "r") as f:
 load_dotenv()
 MJ_API=MidjourneyAPI(os.getenv("MIDJOURNEY_USERID"))
 print(f"USER:{MJ_API.user_id}")
+
 MIDJOURNEY_HEADERS = {
     "authority": "www.midjourney.com",
     "accept": "*/*",
@@ -68,7 +69,7 @@ def getRecentJobsForUser(userId, page, jobs_per_page, max_jobs):
     # paginate
     while len(recent_jobs) < int(max_jobs):
         print(f"Getting page: {page} of {max_jobs} jobs")
-        result = MJ_API.recent_jobs()
+        result = MJ_API.recent_jobs(GetJobsArgs(userId=userId, amount=jobs_per_page))
 
         if result is None or result.status_code != 200:
             print("we got bonked by midjourney api", result.reason)
@@ -113,10 +114,8 @@ def getRunningJobsForUser(userId, num_jobs):
 
 
 def getJobStatus(jobIds: list[str]):
-    global MIDJOURNEY_COOKIE, MIDJOURNEY_HEADERS
-    url = "https://www.midjourney.com/api/app/job-status"
 
-    result = MJ_API.job_status(jobIds[0])
+    result = MJ_API.job_status(jobIds)
     if result is None or result.status_code != 200:
         print("we got bonked by midjourney api", result.reason)
         sleep(5)

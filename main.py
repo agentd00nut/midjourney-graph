@@ -197,6 +197,7 @@ def mainFun(userId, numJobs, page, jobsPerQuery, refresh_graph, intervals):
     print("Got", len(recent_jobs), "recent jobs")
     nodes = [n for n in [nodeFromJob(jobFromJson(j)) for j in recent_jobs]]
     # print("Got", len(nodes), "new nodes from", len(recent_jobs), "recent jobs")
+    
 
     if len(nodes) == 0:
         data = graph.getVisDCCData()
@@ -217,12 +218,27 @@ def mainFun(userId, numJobs, page, jobsPerQuery, refresh_graph, intervals):
         ]
         if len(ref_nodes) <= 0:
             break
-        print(f"Fetching {len(ref_nodes)} reference nodes")
+        ref_node_ids=[n[1]["id"] for n in ref_nodes]
+        print("REF NODE IDS", ref_node_ids)
+        print(f"Fetching {len(ref_node_ids)} reference nodes")
+        
+        ref_response=getJobStatus(ref_node_ids)
+        ref_rj=ref_response.json()
+        print("REF RESPONSE", ref_rj)
+        if len(ref_node_ids) > 1:
+            ref_nodes_to_add = [
+                nodeFromJob(jobFromJson(j.json()))
+                for j in ref_rj
+            ]
+        else:
+            ref_nodes_to_add = [
+                nodeFromJob(jobFromJson(ref_rj))
+            ]
 
-        ref_nodes_to_add = [
-            nodeFromJob(jobFromJson(j))
-            for j in getJobStatus([n[1]["id"] for n in ref_nodes]).json()
-        ]
+        # ref_nodes_to_add = [
+        #     nodeFromJob(jobFromJson(j.json()))
+        #     for j in getJobStatus([n[1]["id"] for n in ref_nodes])
+        # ]
         for n in ref_nodes_to_add:
             graph.add_mj_node(n)
 
