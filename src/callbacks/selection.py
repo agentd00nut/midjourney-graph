@@ -34,7 +34,7 @@ def selection(graph: nGraph, selections):
     if node["image"]:
         x.append(
             html.Img(
-                src="https://storage.googleapis.com/dream-machines-output/"
+                src="https://cdn.midjourney.com/"
                 + node["id"]
                 + "/grid_0.webp",
                 style={"max-width": "40vw"},

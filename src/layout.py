@@ -1,12 +1,10 @@
-from dash import Dash, html, dcc
+from dash import html, dcc
 import visdcc
+from dotenv import load_dotenv
+import os
 
-MIDJ_USER = ""
-try:
-    with open("conf\midj.user", "r") as f:
-        MIDJ_USER = f.read().strip("\n")
-except FileNotFoundError:
-    pass
+load_dotenv()
+MIDJ_USER = os.getenv("MIDJOURNEY_USERID")
 
 NETOPTS_2 = {
     "nodes": {
@@ -203,7 +201,7 @@ layout = html.Div(
                                             debounce=True,
                                             min=1,
                                             max=100,
-                                            value=30,
+                                            value=5, # TODO:: Put back to 30
                                             style={"width": "40px"},
                                         ),
                                         "Start Page:",

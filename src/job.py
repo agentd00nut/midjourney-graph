@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import json
 
 
 @dataclass
@@ -25,22 +26,34 @@ class Job:
 
 
 def jobFromJson(j):
+    print("jobFromJson: ", j)
 
+    if "id" not in j:
+        j = json.loads(j)
+        if "id" not in j:
+            print("jobFromJson: no id, j is: ", j)
+            return None
+    
     job_image_root = (
-        "https://storage.googleapis.com/dream-machines-output/" + j["id"] + "/"
+        "https://cdn.midjourney.com/" + j["id"] + "/"
     )
 
+    paths=[]
+    img=""
+    if "image_paths" in j:
+        paths = j["image_paths"]
+        img=paths[0]
+    if len(paths) == 1:
+        img=job_image_root + "grid_0.webp"
     return Job(
         id=j["id"],
-        image_paths=j["image_paths"],
-        image=j["image_paths"][0]
-        if len(j["image_paths"]) == 1
-        else job_image_root + "grid_0.webp",
+        image_paths=paths,
+        image=img,
         status=j["current_status"],
         enqueue_time=j["enqueue_time"],
         reference_job_id=j["reference_job_id"],
         reference_image_num=j["reference_image_num"],
-        reference_image_path="https://storage.googleapis.com/dream-machines-output/"
+        reference_image_path="https://cdn.midjourney.com/"
         + j["reference_job_id"]
         + "/grid_0"
         # + j["reference_image_num"]

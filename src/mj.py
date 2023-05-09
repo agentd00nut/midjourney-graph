@@ -1,10 +1,16 @@
 import json
 from time import sleep
-import requests, http
+from dotenv import load_dotenv
+import requests, http, os
+from pyjourney import GetJobsArgs, MidjourneyAPI
 
 MIDJOURNEY_COOKIE = None
 with open("conf\midj.cookie", "r") as f:
     MIDJOURNEY_COOKIE = f.read()
+
+load_dotenv()
+MJ_API=MidjourneyAPI(os.getenv("MIDJOURNEY_USERID"))
+print(f"USER:{MJ_API.user_id}")
 
 MIDJOURNEY_HEADERS = {
     "authority": "www.midjourney.com",
@@ -12,7 +18,6 @@ MIDJOURNEY_HEADERS = {
     "accept-language": "en-US,en;q=0.9",
     "cookie": "",
     "dnt": "1",
-    "referer": "https://www.midjourney.com/app/feed/all/",
     "sec-ch-ua": 'Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"',
     "sec-ch-ua-mobile": "?0",
     "sec-ch-ua-platform": "Windows",
@@ -27,12 +32,10 @@ MIDJOURNEY_HEADERS = {
 def mj_POST(url, json=None):
     global MIDJOURNEY_COOKIE
     global MIDJOURNEY_HEADERS
-    simple_cookie = http.cookies.SimpleCookie(MIDJOURNEY_COOKIE)
-    cookie_jar = requests.cookies.RequestsCookieJar()
-    cookie_jar.update(simple_cookie)
+    session = MJ_API.session
 
-    # print(json)
-    r = requests.post(url, json=json, headers=MIDJOURNEY_HEADERS, cookies=cookie_jar)
+    r = session.post(url, json=json, headers=MIDJOURNEY_HEADERS)
+    # r = requests.post(url, json=json, headers=MIDJOURNEY_HEADERS, cookies=cookie_jar)
     if not r:
         print("Error: ")
         print(r)
@@ -56,7 +59,7 @@ def mj_GET(url, querystring):
 
 def getRecentJobsForUser(userId, page, jobs_per_page, max_jobs):
     global MIDJOURNEY_COOKIE, MIDJOURNEY_HEADERS
-    url = "https://www.midjourney.com/api/app/recent-jobs"
+    url = "https://www.midjourney.com/api/app/recent-jobs/"
     if page == 0:
         page = 1
 
@@ -65,17 +68,8 @@ def getRecentJobsForUser(userId, page, jobs_per_page, max_jobs):
     # While we haven't hit the max number of jobs, start at the `page` and ask for `jobs_per_page` from MJ, and add all the jobs to `recent_jobs`
     # paginate
     while len(recent_jobs) < int(max_jobs):
-        querystring = {
-            "amount": jobs_per_page,
-            "orderBy": "new",
-            "jobStatus": "completed",
-            "orderDirection": "desc",
-            "userId": userId,
-            "dedupe": "true",
-            "page": page,
-        }  # "jobType": "yfcc_upsample"
-
-        result = mj_GET(url, querystring)
+        print(f"Getting page: {page} of {max_jobs} jobs")
+        result = MJ_API.recent_jobs(GetJobsArgs(userId=userId, amount=jobs_per_page))
 
         if result is None or result.status_code != 200:
             print("we got bonked by midjourney api", result.reason)
@@ -86,6 +80,7 @@ def getRecentJobsForUser(userId, page, jobs_per_page, max_jobs):
         # print(len(recent_jobs), page)
         page += 1
 
+        break 
     return recent_jobs
 
 
@@ -119,7 +114,13 @@ def getRunningJobsForUser(userId, num_jobs):
 
 
 def getJobStatus(jobIds: list[str]):
-    global MIDJOURNEY_COOKIE, MIDJOURNEY_HEADERS
-    url = "https://www.midjourney.com/api/app/job-status"
-    querystring = json.dumps({"jobIds": jobIds})
-    return mj_POST(url, querystring)
+
+    result = MJ_API.job_status(jobIds)
+    if result is None or result.status_code != 200:
+        print("we got bonked by midjourney api", result.reason)
+        sleep(5)
+        return None
+    return result
+
+    # querystring = json.dumps({"jobIds": jobIds})
+    # return mj_POST(url, querystring)

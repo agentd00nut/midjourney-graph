@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 
 from src.edge import Edge
-
+from src.job import Job
 from enum import Enum
 
 
@@ -20,7 +20,7 @@ class Node:
     image: str | None = field(default_factory=lambda: "")
     reference_job_id: str | None = field(default_factory=lambda: None)
     reference_image_num: str | None = field(default_factory=lambda: None)
-    prompt: str | None = field(default_factory=lambda: None)
+    prompt: str | None = field(default_factory=lambda: "MISSING_PROMPT")
     label: str | None = field(default_factory=lambda: None)
     full_command: str | None = field(default_factory=lambda: None)
     shape: str = "image"
@@ -54,8 +54,9 @@ class Node:
         )
 
     def getPromptEdge(self):
+        print(f"Prompt: {self.prompt} id: {self.id}")
         return Edge(
-            id=self.prompt + "|" + self.id,
+            id=f"{self.prompt}|{self.id}",
             from_=self.getTruncatedFullCommand(),
             to=self.id,
             label="",

@@ -1,12 +1,26 @@
 # MidJourney Graph
 
+# MAIN IS STALE
+
+You can try out the "attempting-to-fix" branch. It's working for fetching and viewing your own jobs, but is probably broken for viewing other users jobs and i haven't tested for running jobs yet
+
+I don't much want to dig into the discord logic since there's a crap load of newer job types, variances, etc. etc.
+
+More importantly i'd imagine that MJ is going to be releasing a new version of their web app soon and i'd rather not spend time on this until that happens since it'll probably expose a new API that's easier to work with, hopefully.
+
+For now you need to put your MJ cookie and userId into a `.env` file, more instructions at [pyjourney](https://github.com/agentd00nut/pyjourney)
+
+> you prooooobably also need to put it in the same `conf/midj.cookie` file as the instructions mention below... The code is cold spaghetti with
+> hot spaghetti inserted into it now :D
+
 ![An image showing the graph based UI](/example.png)
 
 Shows the graph of recent jobs run by the provider userID for midjourney.
 
 Also provides an interface to issue commands to the midjourney bot by hitting the discord API, discord might frown on that behavior though, use those buttons at your own risk.
 
-Uses [discum](https://github.com/Merubokkusu/Discord-S.C.U.Mhttps://github.com/Merubokkusu/Discord-S.C.U.M) to scan for /info requests to parse the results to see how many running jobs you currently have to avoid hitting queue limits. 
+Uses [discum](https://github.com/Merubokkusu/Discord-S.C.U.Mhttps://github.com/Merubokkusu/Discord-S.C.U.M) to scan for /info requests to parse the results to see how many running jobs you currently have to avoid hitting queue limits.
+
 # Setup
 
 `pip install -r requirements.txt`
@@ -17,7 +31,7 @@ Follow the authorization steps down below then...
 
 # Security
 
-Obviously putting all of your cookies and sessions to both discord and midjourney into plain text files on your hard drive is not... the most great idea.  All of the (spaghetti) code in graph is straight forward so you can see we're not doing anything suspicious with your credentials besides using them to call discord api's (though technically we're self botting which is a TOS violation) and midjourney api (which aren't technically public but we try really hard to be gentle on their api.)
+Obviously putting all of your cookies and sessions to both discord and midjourney into plain text files on your hard drive is not... the most great idea. All of the (spaghetti) code in graph is straight forward so you can see we're not doing anything suspicious with your credentials besides using them to call discord api's (though technically we're self botting which is a TOS violation) and midjourney api (which aren't technically public but we try really hard to be gentle on their api.)
 
 Use at your discretion; obviously anything bad that happens from using this is entirely your own fault.
 
@@ -25,12 +39,11 @@ Use at your discretion; obviously anything bad that happens from using this is e
 
 Likely none besides whats said in the security section.
 
-I've used this personally for about a month and left it running overnight, running hundreds of relaxed jobs and nothing bad has happened.  That said; again; technically it is "self-botting" on discord and is using semi-private midjourney apis.  
+I've used this personally for about a month and left it running overnight, running hundreds of relaxed jobs and nothing bad has happened. That said; again; technically it is "self-botting" on discord and is using semi-private midjourney apis.
 
 ### License
 
 Whatever the one that means "give me some money if you make money with it, otherwise do what you want, not my fault if your computer explodes from using this"
-
 
 # Super quick authorization steps
 
@@ -115,7 +128,6 @@ Put the `cookie` string, the whole thing, into `conf/discord.cookie`, make the f
 Also grab the `authorization` string and put it into `conf/discord.authorization`, make the file if it does not exist
 
 Lastly grab the `sessionId` string and put it into `conf/discord.sessionId`, make the file if it does not exist
-
 
 # TODO
 
