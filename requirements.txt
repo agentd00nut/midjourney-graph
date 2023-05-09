@@ -47,3 +47,4 @@ urllib3==1.26.9
 visdcc==0.0.50
 websocket-client==0.59.0
 Werkzeug==2.0.0
+pyjourney==0.1.7

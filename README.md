@@ -1,18 +1,5 @@
 # MidJourney Graph
 
-# MAIN IS STALE
-
-You can try out the "attempting-to-fix" branch. It's working for fetching and viewing your own jobs, but is probably broken for viewing other users jobs and i haven't tested for running jobs yet
-
-I don't much want to dig into the discord logic since there's a crap load of newer job types, variances, etc. etc.
-
-More importantly i'd imagine that MJ is going to be releasing a new version of their web app soon and i'd rather not spend time on this until that happens since it'll probably expose a new API that's easier to work with, hopefully.
-
-For now you need to put your MJ cookie and userId into a `.env` file, more instructions at [pyjourney](https://github.com/agentd00nut/pyjourney)
-
-> you prooooobably also need to put it in the same `conf/midj.cookie` file as the instructions mention below... The code is cold spaghetti with
-> hot spaghetti inserted into it now :D
-
 ![An image showing the graph based UI](/example.png)
 
 Shows the graph of recent jobs run by the provider userID for midjourney.
@@ -28,6 +15,11 @@ Uses [discum](https://github.com/Merubokkusu/Discord-S.C.U.Mhttps://github.com/M
 Follow the authorization steps down below then...
 
 `python main.py`
+
+For now you need to put your MJ cookie and userId into a `.env` file, more instructions at [pyjourney](https://github.com/agentd00nut/pyjourney)
+
+> you prooooobably also need to put it in the same `conf/midj.cookie` file as the instructions mention below... The code is cold spaghetti with
+> hot spaghetti inserted into it now :D
 
 # Security
 
